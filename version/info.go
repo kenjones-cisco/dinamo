@@ -12,7 +12,7 @@ var (
 	GitDescribe string
 
 	// Version is main version number that is being run at the moment.
-	Version = "0.0.0"
+	Version = "0.1.0"
 )
 
 const (
