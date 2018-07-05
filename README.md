@@ -6,6 +6,7 @@
 [![GoCard][3]][4]
 [![Coverage Status][5]][6]
 [![Build Status][7]][8]
+[![Maintainability][11]][12]
 [![MIT License][9]][10]
 
 [1]: https://godoc.org/github.com/kenjones-cisco/dinamo?status.svg
@@ -18,6 +19,8 @@
 [8]: https://travis-ci.org/kenjones-cisco/dinamo
 [9]: http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square
 [10]: https://github.com/kenjones-cisco/dinamo/blob/master/LICENSE
+[11]: https://api.codeclimate.com/v1/badges/f26bf4e7607a7940d26b/maintainability
+[12]: https://codeclimate.com/github/kenjones-cisco/dinamo/maintainability
 
 
 ## Usage

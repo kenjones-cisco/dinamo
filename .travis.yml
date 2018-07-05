@@ -5,11 +5,26 @@ go:
     - 1.10.x
 
 install:
+    - mkdir -p /tmp/bin
+    - wget -O /tmp/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+    - chmod 755 /tmp/bin/jq
+    - wget -O /tmp/bin/yaml "https://github.com/mikefarah/yq/releases/download/1.13.1/yaml_linux_amd64"
+    - chmod 755 /tmp/bin/yaml
+    - export PATH=$PATH:/tmp/bin/
     - go get -u golang.org/x/tools/cmd/goimports
     - go get -u github.com/mattn/goveralls
     - go get -u github.com/alecthomas/gometalinter
     - gometalinter --install --vendor
     - curl https://glide.sh/get | sh
 
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
 script:
   - make local cover
+
+after_script:
+  - cp cover/cover.out c.out
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

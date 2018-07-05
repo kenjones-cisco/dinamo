@@ -133,7 +133,7 @@ format: tmp/glide-installed
 ## Run static code analysis (lint).
 check: format
 ifeq ($(CI_ENABLED),1)
-	${DOCKERNOVENDOR} bash ./scripts/check.sh --jenkins
+	${DOCKERNOVENDOR} bash ./scripts/check.sh --ci
 else
 	${DOCKERNOVENDOR} bash ./scripts/check.sh
 endif

@@ -64,7 +64,7 @@ check() {
 }
 
 case "$1" in
-    --jenkins)
+    --ci)
         RUN_CMD=(gometalinter --checkstyle)
         # if simple fails then detailed never runs meaning file not overwritten
         # but if simple passes then file is essentially empty so if detailed
