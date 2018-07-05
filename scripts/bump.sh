@@ -12,6 +12,6 @@ echo "new version: $next_version"
 ghch -w -N "$next_version"
 
 git add version/info.go CHANGELOG.md
-git ci -m "Release $next_version"
+git commit -m "Release $next_version"
 git tag -a "$next_version" -m "Version $next_version"
 git push && git push --tags
