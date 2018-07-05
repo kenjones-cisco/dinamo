@@ -18,13 +18,13 @@ install:
     - curl https://glide.sh/get | sh
 
 before_script:
-  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-  - chmod +x ./cc-test-reporter
-  - ./cc-test-reporter before-build
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > /tmp/bin/cc-test-reporter
+  - chmod +x /tmp/bin/cc-test-reporter
+  - cc-test-reporter before-build
 
 script:
   - make local cover
 
 after_script:
   - cp cover/cover.out c.out
-  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+  - cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
