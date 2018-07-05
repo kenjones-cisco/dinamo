@@ -28,7 +28,7 @@ RUN go get github.com/alecthomas/gometalinter \
     && go get github.com/mattn/goveralls \
     && go get github.com/mitchellh/gox \
     && go get github.com/motemen/gobump/cmd/gobump \
-    && go get github.com/Songmu/ghch/cmd/ghch \
+    && go get github.com/git-chglog/git-chglog/cmd/git-chglog \
     && go get github.com/tcnksm/ghr \
     && curl -Lo /tmp/glide.tgz https://github.com/Masterminds/glide/releases/download/$GLIDE_VERSION/glide-$GLIDE_VERSION-linux-amd64.tar.gz \
     && tar -C /usr/bin -xzf /tmp/glide.tgz --strip=1 linux-amd64/glide \
