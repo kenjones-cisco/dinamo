@@ -36,12 +36,8 @@ show_html_report() {
     go tool cover -html="$profile" -o="$workdir"/coverage.html
 }
 
-show_jenkins_reports() {
-    rm -f test.xml coverage.xml
-
-    go2xunit -input "$results" -output test.xml
-
-    gocov convert "$profile" | gocov-xml > coverage.xml
+show_ci_report() {
+    goveralls -coverprofile="$profile" -service=travis-ci
 }
 
 _done() {
@@ -64,8 +60,8 @@ generate_cover_data
 case "$1" in
 "")
     show_html_report ;;
---jenkins)
-    show_jenkins_reports ;;
+--ci)
+    show_ci_report ;;
 *)
     echo >&2 "error: invalid option: $1"; exit 1 ;;
 esac

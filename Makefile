@@ -6,7 +6,7 @@ SHELL := /bin/bash
 include Makefile.variables
 include Makefile.local
 
-.PHONY: help clean veryclean build vendor dep-* format check test cover docs adhoc xcompile
+.PHONY: help clean veryclean build vendor dep-* format check test cover docs adhoc xcompile bump package upload release
 
 ## display this help message
 help:
@@ -29,6 +29,10 @@ help:
 	@echo '    veryclean       Same as clean but also removes cached dependencies.'
 	@echo
 	@echo '  ## Release Commands'
+	@echo '    bump            Increment version, generate changelog, tag project and push to Github.'
+	@echo '    package         Create archives for each binary and checksum.'
+	@echo '    upload          Uploaded archives and create release on Github.'
+	@echo '    release         Orchestrates bump, xcompile, package and upload tasks.'
 	@echo
 	@echo '  ## Local Commands'
 	@echo '    setup           Configures Minishfit/Docker directory mounts.'
@@ -111,10 +115,7 @@ endif
 debug:
 	@echo IMPORT_PATH="$(IMPORT_PATH)"
 	@echo ROOT="$(ROOT)"
-	@echo VERSION="$(VERSION)"
-	@echo PRERELEASE="$(PRERELEASE)"
 	@echo RELEASE_TYPE="$(RELEASE_TYPE)"
-	@echo TAG_TYPE="$(TAG_TYPE)"
 	@echo
 	@echo docker commands run as:
 	@echo "$(DOCKERRUN)"
@@ -146,7 +147,7 @@ cover: check
 	@rm -rf cover/
 	@mkdir -p cover
 ifeq ($(CI_ENABLED),1)
-	${DOCKERRUN} bash ./scripts/cover.sh --jenkins
+	${DOCKERRUN} bash ./scripts/cover.sh --ci
 else
 	${DOCKERRUN} bash ./scripts/cover.sh
 	@chmod 644 cover/coverage.html
@@ -167,3 +168,16 @@ adhoc: prepare
 
 # ----------------------------------------------
 # release
+
+bump: prepare
+	${DOCKERNOVENDOR} bash ./scripts/bump.sh
+
+package: xcompile
+	@rm -rf release/
+	@mkdir -p release/
+	${DOCKERNOVENDOR} bash ./scripts/package.sh
+
+upload: prepare
+	${DOCKERNOVENDOR} bash ./scripts/upload.sh
+
+release: bump package upload

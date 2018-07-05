@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PROJECT_FILE="${PROJECT_FILE:-project.yml}"
-VERSION="${VERSION:?missing required input \'VERSION\'}"
+VERSION=$(gobump show -r version)
 
 get_targets() {
     local data
