@@ -37,7 +37,7 @@ show_html_report() {
 }
 
 show_ci_report() {
-    goveralls -coverprofile="$profile" -service=travis-ci
+    goveralls -coverprofile="$profile" -service=travis-ci -package github.com/kenjones-cisco/dinamo
 }
 
 _done() {
