@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .APP_NAME }}
+  namespace: {{ .NAMESPACE }}
+  labels:
+    name: {{ .APP_NAME }}-{{ .LIFECYCLE }}
+spec:
+  ports:
+    # add ports here
+  selector:
+    name: {{ .APP_NAME }}

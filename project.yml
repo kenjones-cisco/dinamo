@@ -1,0 +1,10 @@
+metadata:
+  name: dinamo
+  import: github.com/kenjones-cisco/dinamo
+  version: 0.1.0
+  versioned:
+  - filename: version/info.go
+    search: ${VERSION}
+    replace: ${NEXT_VERSION}
+  build:
+    - target: cmd/dinamo

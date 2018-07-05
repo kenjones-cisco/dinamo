@@ -1,0 +1,32 @@
+# check for any binary required by the Makefile to function in the local environment
+HAS_GIT := $(shell command -v git;)
+HAS_DOCKER := $(shell command -v docker;)
+
+ifndef HAS_GIT
+$(error "You must install Git")
+endif
+ifndef HAS_DOCKER
+$(error "You must install Docker v1.10+")
+endif
+
+## prefix before other make targets to run in your local dev environment
+local: | quiet
+	@$(eval DOCKERRUN= )
+	@$(eval DOCKERNOVENDOR= )
+	@mkdir -p tmp
+	@date > tmp/dev_image_id
+quiet: # this is silly but shuts up 'Nothing to be done for `local`'
+	@:
+
+# ------ Docker Helpers
+.PHONY: drma
+drma:
+	@docker rm $(shell docker ps -a -q) 2>/dev/null || :
+
+.PHONY: drmia
+drmia:
+	@docker rmi $(shell docker images -q --filter "dangling=true") 2>/dev/null || :
+
+.PHONY: drmvu
+drmvu:
+	@docker volume rm $(shell docker volume ls -qf dangling=true) 2>/dev/null || :

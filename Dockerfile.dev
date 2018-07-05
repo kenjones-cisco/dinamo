@@ -1,0 +1,36 @@
+FROM golang:1.10
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        gettext-base \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV YAML_BIN_VERSION 1.13.1
+ENV JQ_BIN_VERSION 1.5
+
+RUN wget -O /usr/local/bin/jq "https://github.com/stedolan/jq/releases/download/jq-${JQ_BIN_VERSION}/jq-linux64" \
+    && chmod 755 /usr/local/bin/jq \
+    && wget -O /usr/local/bin/yaml "https://github.com/mikefarah/yq/releases/download/${YAML_BIN_VERSION}/yaml_linux_amd64" \
+    && chmod 755 /usr/local/bin/yaml
+
+ARG DEVELOPER
+
+RUN git config --global user.name "${DEVELOPER}" \
+    && git config --global user.email "${DEVELOPER}@cisco.com" \
+    && git config --global core.fileMode false \
+    && git config --list
+
+ENV GLIDE_VERSION v0.13.1
+
+RUN go get github.com/alecthomas/gometalinter \
+    && gometalinter --install --vendor \
+    && go get golang.org/x/tools/cmd/goimports \
+    && go get github.com/mitchellh/gox \
+    && go get github.com/axw/gocov/gocov \
+    && go get github.com/t-yuki/gocov-xml \
+    && go get github.com/tebeka/go2xunit \
+    && curl -Lo /tmp/glide.tgz https://github.com/Masterminds/glide/releases/download/$GLIDE_VERSION/glide-$GLIDE_VERSION-linux-amd64.tar.gz \
+    && tar -C /usr/bin -xzf /tmp/glide.tgz --strip=1 linux-amd64/glide \
+    && rm /tmp/glide.tgz
+
+ENV CGO_ENABLED 0
+ENV GOPATH /go:/dinamo

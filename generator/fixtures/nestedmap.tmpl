@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: {{.kind}}
+metadata:
+  name: {{.name}}
+  labels:
+    name: {{.name}}
+  namespace: {{.namespace}}
+  annotations:
+   {{ range $key, $v1 := .envvar}}{{range $k2, $v2 := $v1}}{{range $k3, $v3 := $v2}}{{range $k4, $v4 := $v3}}
+    -  name: {{$k4}}
+       value: {{$v4}}
+   {{end}}{{end}}{{end}}{{end}}
+spec:
+  containers:
+    - name: key-value-store
+      image: {{.image_name}}
+      ports:
+        - containerPort: {{.containerPort}}
+    - name: frontend
+      image: django
+      ports:
+        - containerPort: 8000

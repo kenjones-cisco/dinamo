@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Route
+metadata:
+  name: {{ .APP_NAME }}
+  namespace: {{ .NAMESPACE }}
+  annotations:
+    lifecycle: {{ .LIFECYCLE }}
+spec:
+  port:
+    targetPort: http
+  to:
+    kind: Service
+    # add name of service here
+    name:
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Allow

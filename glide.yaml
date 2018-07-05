@@ -1,0 +1,15 @@
+package: github.com/kenjones-cisco/dinamo
+import:
+  - package: github.com/spf13/cobra
+    version: ^0.0.3
+    subpackages:
+      - doc
+  - package: github.com/sirupsen/logrus
+    version: ^1.0.4
+  - package: github.com/Masterminds/sprig
+    version: ^2.15.0
+  # required because the dependency on github.com/cpuguy83/go-md2man within
+  # github.com/spf13/cobra/doc is not getting picked up by glide, need to manually
+  # set the version to avoid getting 1.x otherwise make docs fails
+  - package: github.com/russross/blackfriday
+    version: ^2.0.0

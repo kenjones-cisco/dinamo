@@ -1,0 +1,105 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ ._node_template_name }}
+spec:
+  ports:
+    - name: web
+      protocol: {{ .protocol }}
+      port: {{ .ext_port_number }}
+      targetPort: {{ .container_port_number }}
+  selector:
+    name: {{ ._node_template_name }}
+  type: ClusterIP
+  sessionAffinity: None
+---
+kind: DeploymentConfig
+apiVersion: v1
+metadata:
+  name: {{ ._node_template_name }}
+spec:
+  template:
+    metadata:
+      labels:
+        name: {{ ._node_template_name }}
+        region: {{ .region }}
+        availability_zone: {{ .avail_zone }}
+      annotations:
+        app_version: {{ .image_tag }}
+    spec:
+      containers:
+        - name: {{ ._node_template_name }}
+          image: {{ .image_name }}:{{ .image_tag }}
+          ports:
+            - containerPort: {{ .container_port_number }}
+              protocol: {{ .protocol }}
+          env:
+            - name: readiness_probe
+              value: {{ .readiness_probe }}
+            - name: _node_template_name
+              value: {{ ._node_template_name }}
+            - name: image_name
+              value: {{ .image_name }}
+            - name: image_tag
+              value: {{ .image_tag }}
+            - name: region
+              value: {{ .region }}
+            - name: avalzone
+              value: {{ .avail_zone }}
+            {{ range $key, $v1 := .envvar}}{{range $k1, $v2 := $v1}}
+            - name: {{$k1}}
+              value: {{$v2}}
+            {{end}}
+            {{end}}
+          volumeMounts:
+            - name: podinfo
+              mountPath: /etc
+              readOnly: false
+          imagePullPolicy: Always
+          securityContext:
+            capabilities: {}
+            privileged: false
+          readinessProbe:
+            httpGet:
+              path: {{ .readiness_probe }}
+              port: {{ .container_port_number }}
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+          livenessProbe:
+            exec:
+              command:
+                - {{ .liveness_probe }}
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+      volumes:
+        - name: podinfo
+          downwardAPI:
+            items:
+              - path: labels
+                fieldRef:
+                  fieldPath: metadata.labels
+              - path: annotations
+                fieldRef:
+                  fieldPath: metadata.annotations
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+  replicas: {{ .replica_num }}
+  selector:
+    name: {{ ._node_template_name }}
+  triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - {{ ._node_template_name }}
+        from:
+          kind: ImageStreamTag
+          name: {{ ._node_template_name }}:latest
+          lastTriggeredImage: {{ .image_name }}:{{ .image_tag }}
+    - type: ConfigChange
+  strategy:
+    type: Rolling
+    rollingParams:
+      updatePeriodSeconds: 1
+      intervalSeconds: 1
+      timeoutSeconds: 120

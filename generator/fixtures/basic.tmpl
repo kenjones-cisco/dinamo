@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: {{.kind}}
+metadata:
+  name: {{.name}}
+  labels:
+    name: {{.name}}
+  namespace: {{.namespace}}
+spec:
+  containers:
+    - name: key-value-store
+      image: {{.image_name}}
+      ports:
+        - containerPort: {{.containerPort}}
+    - name: frontend
+      image: django
+      ports:
+        - containerPort: 8000
