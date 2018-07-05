@@ -15,7 +15,6 @@ endif
 # major, minor, patch
 RELEASE_TYPE ?=
 GITHUB_TOKEN ?=
-COVERALLS_TOKEN ?=
 
 # Windows environment?
 CYG_CHECK := $(shell hash cygpath 2>/dev/null && echo 1)
@@ -43,7 +42,6 @@ DEV_IMAGE := ${PROJECT}_dev
 
 DOCKERRUN := docker run --rm \
 	-e PROJECT_FILE="${PROJECT_FILE}" \
-	-e COVERALLS_TOKEN="${COVERALLS_TOKEN}" \
 	-v ${ROOT}/vendor:/go/src \
 	-v ${ROOT}:/${PROJECT}/src/${IMPORT_PATH} \
 	-w /${PROJECT}/src/${IMPORT_PATH} \
