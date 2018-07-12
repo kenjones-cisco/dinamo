@@ -1,0 +1,20 @@
+{
+  "_node_template_name": "ui-alln",
+  "ext_port_number": 8080,
+  "protocol": "tcp",
+  "image_name": "test@containers.cisco.com",
+  "image_tag": "build12345",
+  "region": "us-cent",
+  "avail_zone": "rtp",
+  "readiness_probe": "./metrics",
+  "liveness_probe": "/bin/true",
+  "replica_num": 2,
+  "container_port_number": 80,
+  "envvar": [
+    {
+      "cisco_lc": "dev",
+      "instance": "live",
+      "vault_token": 3987219281
+    }
+  ]
+}

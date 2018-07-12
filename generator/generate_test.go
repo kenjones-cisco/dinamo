@@ -1,12 +1,10 @@
 package generator
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"math/rand"
 	"os"
 	"path"
-	"strings"
 	"testing"
 	"time"
 )
@@ -31,21 +29,7 @@ func makeTmp(name string) string {
 	return path.Join(tmp, name)
 }
 
-func decodeJSON(t *testing.T, data string) map[string]interface{} {
-	dec := json.NewDecoder(strings.NewReader(data))
-
-	// While decoding JSON values, intepret the integer values as `json.Number`s instead of `float64`.
-	dec.UseNumber()
-
-	var out map[string]interface{}
-	// Since 'out' is an interface representing a pointer, pass it to the decoder without an '&'
-	if err := dec.Decode(&out); err != nil {
-		t.Fatal(err)
-	}
-	return out
-}
-
-func readFile(name string) string {
+func readOutFile(name string) string {
 	rawData, err := ioutil.ReadFile(name)
 	if err != nil {
 		return ""
@@ -53,11 +37,11 @@ func readFile(name string) string {
 	return string(rawData)
 }
 
-func TestGenerate(t *testing.T) {
+func TestGenerate_withSourceData(t *testing.T) {
 	type args struct {
 		inputTemplate string
 		outfile       string
-		data          map[string]interface{}
+		ds            *DataSources
 	}
 	tests := []struct {
 		name    string
@@ -65,20 +49,11 @@ func TestGenerate(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Generate Resource successfully",
-			args: args{
-				inputTemplate: "fixtures/complex.tmpl",
-				outfile:       makeTmp("resources.yaml"),
-				data:          decodeJSON(t, `{"_node_template_name":"ui-alln","ext_port_number":8080,"protocol":"tcp","image_name":"test@containers.cisco.com","image_tag":"build12345","region":"us-cent","avail_zone":"rtp","readiness_probe":"./metrics","liveness_probe":"/bin/true","replica_num":2,"container_port_number":80,"replica_num":2,"envvar":[{"cisco_lc":"dev","instance":"live","vault_token":3987219281}]}`),
-			},
-			wantErr: false,
-		},
-		{
 			name: "Generate Kubconfig successfully",
 			args: args{
 				inputTemplate: "fixtures/config.tmpl",
 				outfile:       makeTmp("config.yaml"),
-				data:          decodeJSON(t, `{"NAMESPACE":"cnt-refapp-dev","USERNAME":"branlyon","INSTANCE":"","INSTANCE_NAME":""}`),
+				ds:            &DataSources{Data: []string{"NAMESPACE=cnt-refapp-dev", "USERNAME=branlyon", "INSTANCE=", "INSTANCE_NAME="}},
 			},
 			wantErr: false,
 		},
@@ -87,7 +62,7 @@ func TestGenerate(t *testing.T) {
 			args: args{
 				inputTemplate: "fixtures/basic.tmpl",
 				outfile:       makeTmp("basic.yaml"),
-				data:          decodeJSON(t, `{"name":"ui-alln","containerPort":8080,"image_name":"redis","namespace":"testing","kind":"v1"}`),
+				ds:            &DataSources{Data: []string{"name=ui-alln", "containerPort=8080", "image_name=redis", "namespace=testing", "kind=v1"}},
 			},
 			wantErr: false,
 		},
@@ -96,7 +71,7 @@ func TestGenerate(t *testing.T) {
 			args: args{
 				inputTemplate: "fixtures/basic.tmpl",
 				outfile:       makeTmp("wrongdata.yaml"),
-				data:          decodeJSON(t, `{"firstName":"Brandon"}`),
+				ds:            &DataSources{Data: []string{"firstName=Brandon"}},
 			},
 			wantErr: true,
 		},
@@ -105,16 +80,7 @@ func TestGenerate(t *testing.T) {
 			args: args{
 				inputTemplate: "fixtures/basic.tmpl",
 				outfile:       makeTmp("toomuchdata.yaml"),
-				data:          decodeJSON(t, `{"name":"ui-alln","containerPort":8080,"image_name":"redis","namespace":"testing","kind":"v1","Test":"DoesNotFail"}`),
-			},
-			wantErr: false,
-		},
-		{
-			name: "Generate file that has nested maps in data successfully ",
-			args: args{
-				inputTemplate: "fixtures/nestedmap.tmpl",
-				outfile:       makeTmp("nestedmap.yaml"),
-				data:          decodeJSON(t, `{"name":"ui-alln","containerPort":8080,"image_name":"redis","namespace":"testing","kind":"v1","envvar": [{"testing": [{"cisco_lc": "dev","instance": "live","vault_token": 3987219281}]}]}`),
+				ds:            &DataSources{Data: []string{"name=ui-alln", "containerPort=8080", "image_name=redis", "namespace=testing", "kind=v1", "Test=DoesNotFail"}},
 			},
 			wantErr: false,
 		},
@@ -123,7 +89,7 @@ func TestGenerate(t *testing.T) {
 			args: args{
 				inputTemplate: "fixtures/nestedmap.tmpl",
 				outfile:       makeTmp("emptydata.yaml"),
-				data:          nil,
+				ds:            &DataSources{},
 			},
 			wantErr: true,
 		},
@@ -132,7 +98,7 @@ func TestGenerate(t *testing.T) {
 			args: args{
 				inputTemplate: "fixtures/nestedmap.tmpl",
 				outfile:       "./templates/InvalidPath.yaml",
-				data:          decodeJSON(t, `{"name":"ui-alln","containerPort":8080,"image_name":"redis","namespace":"testing","kind":"v1","envvar": [{"testing": [{"cisco_lc": "dev","instance": "live","vault_token": 3987219281}]}]}`),
+				ds:            &DataSources{Data: []string{"name=ui-alln", "containerPort=8080", "image_name=redis", "namespace=testing", "kind=v1"}},
 			},
 			wantErr: true,
 		},
@@ -141,14 +107,115 @@ func TestGenerate(t *testing.T) {
 			args: args{
 				inputTemplate: "template/nestedmap.tmpl",
 				outfile:       makeTmp("invalidpath.yaml"),
-				data:          decodeJSON(t, `{"name":"ui-alln","containerPort":8080,"image_name":"redis","namespace":"testing","kind":"v1","envvar": [{"testing": [{"cisco_lc": "dev","instance": "live","vault_token": 3987219281}]}]}`),
+				ds:            &DataSources{Data: []string{"name=ui-alln", "containerPort=8080", "image_name=redis", "namespace=testing", "kind=v1"}},
 			},
 			wantErr: true,
 		},
 	}
 
 	for _, tt := range tests {
-		if err := Generate(tt.args.inputTemplate, tt.args.outfile, tt.args.data); (err != nil) != tt.wantErr {
+		if err := Generate(tt.args.inputTemplate, tt.args.outfile, tt.args.ds); (err != nil) != tt.wantErr {
+			t.Errorf("%q. Generate() error = %v, wantErr %v", tt.name, err, tt.wantErr)
+		}
+		// Checks if Output file exist
+		if _, err := os.Stat(tt.args.outfile); os.IsNotExist(err) {
+			if (err != nil) != tt.wantErr {
+				// path does not exist
+				t.Errorf("File path does not exist: %v ", err)
+			}
+		}
+
+	}
+}
+
+func TestGenerate_withSourceDataFile(t *testing.T) {
+	type args struct {
+		inputTemplate string
+		outfile       string
+		ds            *DataSources
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Generate Resource successfully - json file",
+			args: args{
+				inputTemplate: "fixtures/complex.tmpl",
+				outfile:       makeTmp("resources1j.yaml"),
+				ds:            &DataSources{DataFile: "fixtures/source1.json"},
+			},
+			wantErr: false,
+		},
+
+		{
+			name: "Generate Resource successfully - yaml file",
+			args: args{
+				inputTemplate: "fixtures/complex.tmpl",
+				outfile:       makeTmp("resources1y.yaml"),
+				ds:            &DataSources{DataFile: "fixtures/source1.yaml"},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Generate file that has nested maps in data successfully - json file",
+			args: args{
+				inputTemplate: "fixtures/nestedmap.tmpl",
+				outfile:       makeTmp("nestedmap1j.yaml"),
+				ds:            &DataSources{DataFile: "fixtures/source2.json"},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Generate file that has nested maps in data successfully - yml file",
+			args: args{
+				inputTemplate: "fixtures/nestedmap.tmpl",
+				outfile:       makeTmp("nestedmap1y.yaml"),
+				ds:            &DataSources{DataFile: "fixtures/source2.yml"},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Generate basic file unsuccessfully due to incorrect data file type",
+			args: args{
+				inputTemplate: "fixtures/basic.tmpl",
+				outfile:       makeTmp("wrongdata.yaml"),
+				ds:            &DataSources{DataFile: "fixtures/source1.toml"},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Generate basic file unsuccessfully due to unknown data file",
+			args: args{
+				inputTemplate: "fixtures/basic.tmpl",
+				outfile:       makeTmp("wrongdata.yaml"),
+				ds:            &DataSources{DataFile: "random/fakefilethatdoesnotexist.yaml"},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Generate basic file unsuccessfully due to invalid yaml data file",
+			args: args{
+				inputTemplate: "fixtures/complex.tmpl",
+				outfile:       makeTmp("resourcesxy.yaml"),
+				ds:            &DataSources{DataFile: "fixtures/badsource.yaml"},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Generate basic file unsuccessfully due to invalid json data file",
+			args: args{
+				inputTemplate: "fixtures/complex.tmpl",
+				outfile:       makeTmp("resourcesxj.yaml"),
+				ds:            &DataSources{DataFile: "fixtures/badsource.json"},
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		if err := Generate(tt.args.inputTemplate, tt.args.outfile, tt.args.ds); (err != nil) != tt.wantErr {
 			t.Errorf("%q. Generate() error = %v, wantErr %v", tt.name, err, tt.wantErr)
 		}
 		// Checks if Output file exist
@@ -221,19 +288,15 @@ data:
   common.synthetic.influx: aW5mbHV4PWh0dHA6Ly9kYnVzZXJuYW1lOlNac1pPS2pHYkhNdDFkZE5XQ2U5QHNlcnZlci1hcGkuZXhhbXBsZS5jb206ODIwMC9kYm5hbWU=
 `
 
-func TestGenerateUsingEnv(t *testing.T) {
+func TestGenerate_withSourceEnv(t *testing.T) {
 	envVars := []string{"INSTANCE", "INSTANCE_NAME", "NAMESPACE", "USERNAME", "APP_NAME", "LIFECYCLE",
 		"SECRET_DB_PASSWORD", "SECRET_INTERNAL_API_KEY", "SECRET_CLIENT_PASSWORD", "SECRET_CLIENT_SECRET",
 		"SECRET_OPENSTACK_CLIENT_PASSWORD", "SECRET_OPENSTACK_CLIENT_SECRET", "SECRET_IAM_LDAP_PASSWORD",
 		"SECRET_SYNTHETIC_INFLUX",
 	}
-	existingEnv := make(map[string]string)
-	for _, k := range envVars {
-		existingEnv[k] = os.Getenv(k)
-	}
 	defer func() {
-		for k, v := range existingEnv {
-			_ = os.Setenv(k, v)
+		for _, k := range envVars {
+			_ = os.Unsetenv(k)
 		}
 	}()
 
@@ -255,6 +318,7 @@ func TestGenerateUsingEnv(t *testing.T) {
 	type args struct {
 		inputTemplate string
 		outfile       string
+		ds            *DataSources
 	}
 	tests := []struct {
 		name    string
@@ -267,6 +331,7 @@ func TestGenerateUsingEnv(t *testing.T) {
 			args: args{
 				inputTemplate: "fixtures/config.tmpl",
 				outfile:       makeTmp("config.yaml"),
+				ds:            &DataSources{UseEnv: true},
 			},
 			want:    wantConfig,
 			wantErr: false,
@@ -276,6 +341,7 @@ func TestGenerateUsingEnv(t *testing.T) {
 			args: args{
 				inputTemplate: "fixtures/secrets.tmpl",
 				outfile:       makeTmp("secrets.yaml"),
+				ds:            &DataSources{UseEnv: true},
 			},
 			want:    wantSecret,
 			wantErr: false,
@@ -283,8 +349,8 @@ func TestGenerateUsingEnv(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		if err := GenerateUsingEnv(tt.args.inputTemplate, tt.args.outfile); (err != nil) != tt.wantErr {
-			t.Errorf("%q. GenerateUsingEnv() error = %v, wantErr %v", tt.name, err, tt.wantErr)
+		if err := Generate(tt.args.inputTemplate, tt.args.outfile, tt.args.ds); (err != nil) != tt.wantErr {
+			t.Errorf("%q. Generate() error = %v, wantErr %v", tt.name, err, tt.wantErr)
 		}
 		// Checks if Output file exist
 		if _, err := os.Stat(tt.args.outfile); os.IsNotExist(err) {
@@ -294,7 +360,139 @@ func TestGenerateUsingEnv(t *testing.T) {
 			}
 		}
 
-		got := readFile(tt.args.outfile)
+		got := readOutFile(tt.args.outfile)
+		if got != tt.want {
+			t.Errorf("expected: %v, got: %v", tt.want, got)
+		}
+	}
+}
+
+var wantConfigMulti = `apiVersion: v1
+clusters:
+- cluster:
+    insecure-skip-tls-verify: true
+    server: https://cae-alln.cisco.com:443
+  name: cae-alln-cisco-com:443
+- cluster:
+    insecure-skip-tls-verify: true
+    server: https://cae-rcdn.cisco.com:443
+  name: cae-rcdn-cisco-com:443
+- cluster:
+    insecure-skip-tls-verify: true
+    server: https://cae-rtp.cisco.com:443
+  name: cae-rtp-cisco-com:443
+- cluster:
+    insecure-skip-tls-verify: true
+    server: https://localhost:443
+  name: localhost:443
+contexts:
+- context:
+    cluster: cae-alln-cisco-com:443
+    namespace: testns
+    user: otheruser.gen/cae-alln-cisco-com:443
+  name: testns/cae-alln-cisco-com:443/otheruser.gen
+- context:
+    cluster: cae-rcdn-cisco-com:443
+    namespace: testns
+    user: otheruser.gen/cae-rcdn-cisco-com:443
+  name: testns/cae-rcdn-cisco-com:443/otheruser.gen
+- context:
+    cluster: cae-rtp-cisco-com:443
+    namespace: testns
+    user: otheruser.gen/cae-rtp-cisco-com:443
+  name: testns/cae-rtp-cisco-com:443/otheruser.gen
+- context:
+    cluster: localhost:443
+    namespace: testns
+    user: otheruser.gen/localhost:443
+  name: testns/localhost:443/otheruser.gen
+`
+
+var wantSecretMulti = `apiVersion: v1
+kind: Secret
+metadata:
+  name: test-app
+  namespace: mynamespace
+  annotations:
+    lifecycle: prod
+data:
+  common.db.password: NUpCUzB0UURWSHB3RjJFTVVhdks=
+  common.internal.api.key: VGx2bzNoMTlTZ1lYdFZ6YnpVQ21taE5RNUhSU1hkTDdjbE9tRUFlYXNIeVBWQndieE4zdFBo
+  common.client.password: b1NPQlorU0FDa0hSNjlaNWQ1QWI=
+  common.client.secret: eUR3UkFZY0RIeGRCekQvN3pTUUNCYnV2WkMvag==
+  common.openstack.client.password: MnlkcUprb3QwTzJJMjRlNEtZcFQ=
+  common.openstack.client.secret: Ti9XdjFzZU1Bb1p6SEtSMS9LbkVJVWJueWF5ZXIyTzVrN1N4ZzladzhvRDdrbCtrdUtOZ2RBPT0=
+  common.iam.ldap.password: cUU4d09yQmpMKzJvejdJVExwRHI=
+  common.synthetic.influx: aW5mbHV4PWh0dHA6Ly9kYnVzZXJuYW1lOlNac1pPS2pHYkhNdDFkZE5XQ2U5QHNlcnZlci1hcGkuZXhhbXBsZS5jb206ODIwMC9kYm5hbWU=
+`
+
+func TestGenerate_withMultipleSources(t *testing.T) {
+	envVars := []string{"INSTANCE", "INSTANCE_NAME", "NAMESPACE", "APP_NAME"}
+	defer func() {
+		for _, k := range envVars {
+			_ = os.Unsetenv(k)
+		}
+	}()
+
+	_ = os.Setenv("INSTANCE", "https://localhost:443")
+	_ = os.Setenv("INSTANCE_NAME", "localhost:443")
+	_ = os.Setenv("NAMESPACE", "mynamespace")
+	_ = os.Setenv("APP_NAME", "test-app")
+
+	type args struct {
+		inputTemplate string
+		outfile       string
+		ds            *DataSources
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "Generate Kubconfig successfully - use multiple sources",
+			args: args{
+				inputTemplate: "fixtures/config.tmpl",
+				outfile:       makeTmp("config.yaml"),
+				ds: &DataSources{
+					Data:     []string{"NAMESPACE=testns"},
+					DataFile: "fixtures/source_app.yaml",
+					UseEnv:   true,
+				},
+			},
+			want:    wantConfigMulti,
+			wantErr: false,
+		},
+		{
+			name: "Generate k8s secrets successfully - use multiple sources",
+			args: args{
+				inputTemplate: "fixtures/secrets.tmpl",
+				outfile:       makeTmp("secrets.yaml"),
+				ds: &DataSources{
+					Data:     []string{"LIFECYCLE=prod"},
+					DataFile: "fixtures/source_secret.yaml",
+					UseEnv:   true,
+				},
+			},
+			want:    wantSecretMulti,
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		if err := Generate(tt.args.inputTemplate, tt.args.outfile, tt.args.ds); (err != nil) != tt.wantErr {
+			t.Errorf("%q. Generate() error = %v, wantErr %v", tt.name, err, tt.wantErr)
+		}
+		// Checks if Output file exist
+		if _, err := os.Stat(tt.args.outfile); os.IsNotExist(err) {
+			if (err != nil) != tt.wantErr {
+				// path does not exist
+				t.Errorf("File path does not exist: %v ", err)
+			}
+		}
+
+		got := readOutFile(tt.args.outfile)
 		if got != tt.want {
 			t.Errorf("expected: %v, got: %v", tt.want, got)
 		}

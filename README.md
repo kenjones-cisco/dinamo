@@ -1,5 +1,7 @@
 # Dynamic Generator
 
+Lightweight command-line utility for generating file(s) from using go templates.
+
 ## Status
 
 [![GoDoc][1]][2]
@@ -21,6 +23,22 @@
 [10]: https://github.com/kenjones-cisco/dinamo/blob/master/LICENSE
 [11]: https://api.codeclimate.com/v1/badges/f26bf4e7607a7940d26b/maintainability
 [12]: https://codeclimate.com/github/kenjones-cisco/dinamo/maintainability
+
+
+## Install
+
+- Download pre-built binaries using [Published Releases](https://github.com/kenjones-cisco/dinamo/releases).
+
+- Alternatively install using `go get`:
+```
+go get github.com/kenjones-cisco/dinamo/cmd/dinamo
+```
+
+## Features
+
+- Generate file(s) using a template
+- Supports multiple data sources, key-value arguments, environment variables, YAML files, and JSON files
+- Supports [sprig](http://masterminds.github.io/sprig) template functions
 
 
 ## Usage

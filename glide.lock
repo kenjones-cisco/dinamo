@@ -1,5 +1,5 @@
-hash: cb3810ffb28abc4133f5fa2538d27c0ff3900e5cc8ec985ede736bd91ab48eb4
-updated: 2018-07-05T04:58:11.5360965Z
+hash: d8b27ea8f884a6822da99686828ce657b0a35906a48f3d5553bccca925597b27
+updated: 2018-07-12T16:47:45.1796877Z
 imports:
 - name: github.com/aokoli/goutils
   version: 3391d3790d23d03408670993e957e8f408993c34
@@ -7,6 +7,8 @@ imports:
   version: 691ee98543af2f262f35fbb54bdd42f00b9b9cc5
   subpackages:
   - md2man
+- name: github.com/ghodss/yaml
+  version: 0ca9ea5df5451ffdf184b4428c902747c2c11cd7
 - name: github.com/google/uuid
   version: 064e2069ce9c359c118179501254f67d7d37ba24
 - name: github.com/huandu/xstrings
@@ -25,6 +27,10 @@ imports:
   version: 86672fcb3f950f35f2e675df2240550f2a50762f
 - name: github.com/sirupsen/logrus
   version: c155da19408a8799da419ed3eeb0cb5db0ad5dbc
+- name: github.com/spf13/afero
+  version: 787d034dfe70e44075ccc060d346146ef53270ad
+  subpackages:
+  - mem
 - name: github.com/spf13/cobra
   version: ef82de70bb3f60c65fb8eebacbb2d122ef517385
   subpackages:
@@ -38,10 +44,15 @@ imports:
   - scrypt
   - ssh/terminal
 - name: golang.org/x/sys
-  version: 151529c776cdc58ddbe7963ba9af779f3577b419
+  version: 1b2967e3c290b7c545b3db0deeda16e9be4f98a2
   subpackages:
   - unix
   - windows
+- name: golang.org/x/text
+  version: 0605a8320aceb4207a5fb3521281e17ec2075476
+  subpackages:
+  - transform
+  - unicode/norm
 - name: gopkg.in/yaml.v2
   version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
 testImports: []
