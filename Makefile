@@ -155,11 +155,10 @@ endif
 
 docs: prepare
 	@rm -rf docs/
-	@mkdir -p docs/usage
-	${DOCKERNOVENDOR} bash ./scripts/docs.sh
+	@mkdir -p docs
+	${DOCKERNOVENDOR} go run gendocs.go
 	@chmod 755 docs
-	@chmod 755 docs/usage
-	@chmod 644 docs/usage/*.md
+	@chmod 644 docs/*.md
 
 # usage: make adhoc RUNTHIS='command to run inside of dev container'
 # example: make adhoc RUNTHIS='which glide'

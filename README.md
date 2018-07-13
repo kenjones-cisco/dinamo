@@ -43,7 +43,7 @@ go get github.com/kenjones-cisco/dinamo/cmd/dinamo
 
 ## Usage
 
-See detailed [Usage](docs/usage/dinamo.md)
+See detailed [Usage](docs/dinamo.md)
 
 ```bash
 # create output.txt from config.tmpl using the key-value pairs

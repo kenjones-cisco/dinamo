@@ -1,3 +1,5 @@
+// +build ignore
+
 package main
 
 import (
@@ -9,7 +11,9 @@ import (
 )
 
 func main() {
-	if err := doc.GenMarkdownTree(commands.NewCommandCLI(), "./docs/usage"); err != nil {
+	cmd := commands.NewCommandCLI()
+	cmd.DisableAutoGenTag = true
+	if err := doc.GenMarkdownTree(cmd, "./docs"); err != nil {
 		log.Fatal(err)
 	}
 }

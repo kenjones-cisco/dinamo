@@ -21,11 +21,10 @@ func NewCommandCLI() *cobra.Command {
 	opts := &commonOptions{}
 
 	rootCmd := &cobra.Command{
-		Use:               version.ShortName,
-		Short:             version.ProductName,
-		Long:              "Lightweight command-line utility for generating file(s) from using go templates.",
-		SilenceUsage:      true,
-		DisableAutoGenTag: true,
+		Use:          version.ShortName,
+		Short:        version.ProductName,
+		Long:         "Lightweight command-line utility for generating file(s) from using go templates.",
+		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if opts.Version {
 				cmd.Print(version.GetVersionDisplay())

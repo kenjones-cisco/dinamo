@@ -48,8 +48,7 @@ dinamo gen -t config.tmpl -f output.txt -e key1=value1 key2=value2
 # create output.txt from config.tmpl using the key-value pairs, environment variables, and the YAML data file source.yml
 dinamo gen -t config.tmpl -f output.txt -e -d source.yml key1=value1 key2=value2
 `,
-		Args:              cobra.ArbitraryArgs,
-		DisableAutoGenTag: true,
+		Args: cobra.ArbitraryArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			sources := &generator.DataSources{
 				Data:     args,
