@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/kenjones-cisco/dinamo/generator"
@@ -65,7 +67,7 @@ dinamo gen -t config.tmpl -f output.txt -e -d source.yml key1=value1 key2=value2
 
 	action.Flags().StringVarP(&opts.Template, "template", "t", "", "Template file path")
 	action.Flags().StringVarP(&opts.File, "file", "f", "", "Path to generated file")
-	action.Flags().StringVarP(&opts.DataFile, "data", "d", "", `Path to data file of type ("json", "yaml", "yml")`)
+	action.Flags().StringVarP(&opts.DataFile, "data", "d", "", fmt.Sprintf("Path to data file of type %q", generator.SupportedFileTypes))
 	action.Flags().BoolVarP(&opts.UseEnv, "env", "e", false, "Use environment variables for placeholders")
 
 	_ = action.MarkFlagRequired("template")
@@ -73,7 +75,7 @@ dinamo gen -t config.tmpl -f output.txt -e -d source.yml key1=value1 key2=value2
 
 	_ = action.MarkFlagFilename("template")
 	_ = action.MarkFlagFilename("file")
-	_ = action.MarkFlagFilename("data", ".json", ".yaml", ".yml")
+	_ = action.MarkFlagFilename("data", generator.SupportedFileTypes...)
 
 	return action
 }
