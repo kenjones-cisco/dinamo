@@ -13,13 +13,6 @@ RUN wget -O /usr/local/bin/jq "https://github.com/stedolan/jq/releases/download/
     && wget -O /usr/local/bin/yaml "https://github.com/mikefarah/yq/releases/download/${YAML_BIN_VERSION}/yaml_linux_amd64" \
     && chmod 755 /usr/local/bin/yaml
 
-ARG DEVELOPER
-
-RUN git config --global user.name "${DEVELOPER}" \
-    && git config --global user.email "${DEVELOPER}@cisco.com" \
-    && git config --global core.fileMode false \
-    && git config --list
-
 ENV GLIDE_VERSION v0.13.1
 
 RUN go get github.com/alecthomas/gometalinter \

@@ -60,7 +60,7 @@ tmp/dev_image_id: Dockerfile.dev
 	@mkdir -p tmp
 	@docker rmi -f ${DEV_IMAGE} > /dev/null 2>&1 || true
 	@echo "## Building dev container"
-	@docker build --quiet -t ${DEV_IMAGE} --build-arg DEVELOPER="${DEVELOPER}" -f Dockerfile.dev .
+	@docker build --quiet -t ${DEV_IMAGE} -f Dockerfile.dev .
 	@docker inspect -f "{{ .ID }}" ${DEV_IMAGE} > tmp/dev_image_id
 
 # ----------------------------------------------
