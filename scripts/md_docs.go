@@ -5,12 +5,11 @@ import (
 
 	"github.com/spf13/cobra/doc"
 
-	"github.com/kenjones-cisco/dinamo/cmd/dinamo/commands"
+	"github.com/kenjones-cisco/dinamo/commands"
 )
 
 func main() {
-	err := doc.GenMarkdownTree(commands.NewCommandCLI(), "./docs/usage")
-	if err != nil {
+	if err := doc.GenMarkdownTree(commands.NewCommandCLI(), "./docs/usage"); err != nil {
 		log.Fatal(err)
 	}
 }

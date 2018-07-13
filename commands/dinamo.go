@@ -21,10 +21,11 @@ func NewCommandCLI() *cobra.Command {
 	opts := &commonOptions{}
 
 	rootCmd := &cobra.Command{
-		Use:          "dinamo",
-		Short:        version.ProductName,
-		Long:         version.ProductName,
-		SilenceUsage: true,
+		Use:               version.ShortName,
+		Short:             version.ProductName,
+		Long:              "Lightweight command-line utility for generating file(s) from using go templates.",
+		SilenceUsage:      true,
+		DisableAutoGenTag: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if opts.Version {
 				cmd.Print(version.GetVersionDisplay())
@@ -61,7 +62,7 @@ func NewCommandCLI() *cobra.Command {
 	}
 
 	rootCmd.PersistentFlags().BoolVarP(&opts.Debug, "debug", "D", false, "Enable debug mode")
-	rootCmd.PersistentFlags().StringVarP(&opts.LogLevel, "log-level", "l", "info", "Set the logging level (\"debug\", \"info\", \"warn\", \"error\", \"fatal\")")
+	rootCmd.PersistentFlags().StringVarP(&opts.LogLevel, "log-level", "l", "info", `Set the logging level ("debug", "info", "warn", "error", "fatal")`)
 	rootCmd.Flags().BoolVarP(&opts.Version, "version", "v", false, "Print version information and quit")
 
 	rootCmd.AddCommand(newCommandGenerate())

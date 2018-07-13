@@ -3,4 +3,4 @@ metadata:
   namespace: kenjones-cisco
   import: github.com/kenjones-cisco/dinamo
   build:
-    - target: cmd/dinamo
+    - target: .

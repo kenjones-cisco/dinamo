@@ -46,7 +46,29 @@ go get github.com/kenjones-cisco/dinamo/cmd/dinamo
 See detailed [Usage](docs/usage/dinamo.md)
 
 ```bash
-dinamo generate --template mytemplate.tmpl --file myfile key1=value1 key2=value2
+# create output.txt from config.tmpl using the key-value pairs
+dinamo gen -t config.tmpl -f output.txt key1=value1 key2=value2
+
+# create output.txt from config.tmpl using the JSON data file source.json
+dinamo gen -t config.tmpl -f output.txt -d source.json
+
+# create output.txt from config.tmpl using the YAML data file source.yaml
+dinamo gen -t config.tmpl -f output.txt -d source.yaml
+
+# create output.txt from config.tmpl using environment variables
+dinamo gen -t config.tmpl -f output.txt -e
+
+# create output.txt from config.tmpl using the key-value pairs and the YAML data file source.yml
+dinamo gen -t config.tmpl -f output.txt -d source.yml key1=value1 key2=value2
+
+# create output.txt from config.tmpl using the key-value pairs and the JSON data file source.json
+dinamo gen -t config.tmpl -f output.txt -d source.json key1=value1 key2=value2
+
+# create output.txt from config.tmpl using the key-value pairs and environment variables
+dinamo gen -t config.tmpl -f output.txt -e key1=value1 key2=value2
+
+# create output.txt from config.tmpl using the key-value pairs, environment variables, and the YAML data file source.yml
+dinamo gen -t config.tmpl -f output.txt -e -d source.yml key1=value1 key2=value2
 ```
 
 ## Contributions
