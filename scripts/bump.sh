@@ -9,7 +9,7 @@ gobump "$RELEASE_TYPE" -w version
 next_version=$(gobump show -r version)
 echo "new version: $next_version"
 
-git-chglog --output CHANGELOG.md --next-tag "$next_version" "$next_version"
+git-chglog --output CHANGELOG.md
 
 git add version/info.go CHANGELOG.md
 git commit -m "Release $next_version"
