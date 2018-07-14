@@ -9,7 +9,6 @@ RESULTS=/dev/stdout
 set_opts() {
 
 read -r COMMON_OPTS << EOM
-    --skip=.glide \
     --exclude=vendor \
     --tests \
     --vendor

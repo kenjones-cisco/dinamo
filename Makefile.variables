@@ -2,6 +2,7 @@ PROJECT_FILE = project.yml
 export PROJECT = $(shell awk '/name: / { print $$2; exit }' ${PROJECT_FILE})
 IMPORT_PATH = $(shell awk '/import: / { print $$2; exit }' ${PROJECT_FILE})
 
+DEP ?=
 
 CI ?=
 ifeq ($(strip $(CI)),)

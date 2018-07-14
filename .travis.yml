@@ -14,7 +14,7 @@ install:
     - go get -u github.com/mattn/goveralls
     - go get -u github.com/alecthomas/gometalinter
     - gometalinter --install --vendor
-    - curl https://glide.sh/get | sh
+    - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > /tmp/bin/cc-test-reporter

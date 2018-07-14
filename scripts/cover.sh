@@ -14,7 +14,7 @@ results=test.out
 
 
 generate_cover_data() {
-    for pkg in $(glide nv);
+    for pkg in $(go list ./...);
     do
         for subpkg in $(go list "${pkg}");
         do

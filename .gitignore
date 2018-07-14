@@ -79,9 +79,6 @@ $RECYCLE.BIN/
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
-.glide/
-
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o
 *.a
@@ -110,6 +107,7 @@ build/
 release/
 cover/
 vendor/
+vendor.orig/
 Godeps/_workspace/
 *.tar.gz
 *.xml

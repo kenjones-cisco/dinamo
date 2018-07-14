@@ -13,8 +13,6 @@ RUN wget -O /usr/local/bin/jq "https://github.com/stedolan/jq/releases/download/
     && wget -O /usr/local/bin/yaml "https://github.com/mikefarah/yq/releases/download/${YAML_BIN_VERSION}/yaml_linux_amd64" \
     && chmod 755 /usr/local/bin/yaml
 
-ENV GLIDE_VERSION v0.13.1
-
 RUN go get github.com/alecthomas/gometalinter \
     && gometalinter --install --vendor \
     && go get golang.org/x/tools/cmd/goimports \
@@ -23,9 +21,7 @@ RUN go get github.com/alecthomas/gometalinter \
     && go get github.com/motemen/gobump/cmd/gobump \
     && go get github.com/git-chglog/git-chglog/cmd/git-chglog \
     && go get github.com/tcnksm/ghr \
-    && curl -Lo /tmp/glide.tgz https://github.com/Masterminds/glide/releases/download/$GLIDE_VERSION/glide-$GLIDE_VERSION-linux-amd64.tar.gz \
-    && tar -C /usr/bin -xzf /tmp/glide.tgz --strip=1 linux-amd64/glide \
-    && rm /tmp/glide.tgz
+    && curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 ENV CGO_ENABLED 0
 ENV GOPATH /go:/dinamo

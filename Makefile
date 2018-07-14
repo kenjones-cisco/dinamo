@@ -18,9 +18,9 @@ help:
 	@echo '    xcompile        Compile the project for multiple OS and Architectures.'
 	@echo
 	@echo '  ## Develop / Test Commands'
-	@echo '    vendor          Install dependencies using glide if glide.yaml changed.'
-	@echo '    dep-update      Update dependencies using glide.'
-	@echo '    dep-add         Add new dependencies to glide and install.'
+	@echo '    vendor          Install dependencies using dep if Gopkg.toml changed.'
+	@echo '    dep-update      Update dependencies using dep.'
+	@echo '    dep-add         Add new dependencies to dep and install.'
 	@echo '    format          Run code formatter.'
 	@echo '    check           Run static code analysis (lint).'
 	@echo '    test            Run tests on project.'
@@ -52,7 +52,7 @@ clean: .ci-clean prepare
 
 ## Same as clean but also removes cached dependencies.
 veryclean: clean
-	@${DOCKERRUN} bash -c 'rm -rf tmp .glide vendor'
+	@${DOCKERRUN} bash -c 'rm -rf tmp vendor'
 
 ## builds the dev container
 prepare: tmp/dev_image_id
@@ -86,27 +86,27 @@ xcompile: check
 # ----------------------------------------------
 # dependencies
 
-## Install dependencies using glide if glide.yaml changed.
-vendor: tmp/glide-installed
-tmp/glide-installed: tmp/dev_image_id glide.yaml
+## Install dependencies using dep if Gopkg.toml changed.
+vendor: tmp/vendor-installed
+tmp/vendor-installed: tmp/dev_image_id Gopkg.toml
 	@mkdir -p vendor
-	${DOCKERRUN} glide install --skip-test --strip-vendor
-	@date > tmp/glide-installed
-	@chmod 644 glide.lock || :
+	${DOCKERRUN} dep ensure
+	@date > tmp/vendor-installed
+	@chmod 644 Gopkg.lock || :
 
-## Update dependencies using glide.
+## Update dependencies using dep.
 dep-update: prepare
-	${DOCKERRUN} glide up --skip-test --strip-vendor
-	@chmod 644 glide.lock || :
+	${DOCKERRUN} dep ensure -update ${DEP}
+	@chmod 644 Gopkg.lock || :
 
 # usage DEP=github.com/owner/package make dep-add
-## Add new dependencies to glide and install.
+## Add new dependencies to dep and install.
 dep-add: prepare
 ifeq ($(strip $(DEP)),)
 	$(error "No dependency provided. Expected: DEP=<go import path>")
 endif
-	${DOCKERNOVENDOR} glide get --skip-test --strip-vendor ${DEP}
-	@chmod 644 glide.lock || :
+	${DOCKERRUN} dep ensure -add ${DEP}
+	@chmod 644 Gopkg.lock || :
 
 # ----------------------------------------------
 # develop and test
@@ -121,7 +121,7 @@ debug:
 	@echo "$(DOCKERRUN)"
 
 ## Run code formatter.
-format: tmp/glide-installed
+format: tmp/vendor-installed
 	${DOCKERNOVENDOR} bash ./scripts/format.sh
 	@if [[ -n "$$(git -c core.fileMode=false status --porcelain)" ]]; then \
     	echo "goimports modified code; requires attention!" ; \
@@ -161,7 +161,7 @@ docs: prepare
 	@chmod 644 docs/*.md
 
 # usage: make adhoc RUNTHIS='command to run inside of dev container'
-# example: make adhoc RUNTHIS='which glide'
+# example: make adhoc RUNTHIS='which jq'
 adhoc: prepare
 	@${DOCKERRUN} ${RUNTHIS}
 
