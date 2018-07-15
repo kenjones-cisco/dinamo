@@ -11,8 +11,8 @@ import (
 )
 
 type commonOptions struct {
-	Debug    bool
 	LogLevel string
+	Debug    bool
 	Version  bool
 }
 

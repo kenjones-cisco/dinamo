@@ -32,7 +32,7 @@ func runCmd(c *cobra.Command, input string) resulter {
 	err := c.Execute()
 	output := buf.String()
 
-	return resulter{err, output, c}
+	return resulter{Error: err, Output: output, Command: c}
 }
 
 func getRootCommand() *cobra.Command {

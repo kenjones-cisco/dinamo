@@ -7,6 +7,10 @@ import (
 	"testing"
 )
 
+const (
+	testTemplate = "fixtures/config.tmpl"
+)
+
 var wantConfig = `apiVersion: v1
 clusters:
 - cluster:
@@ -49,10 +53,8 @@ contexts:
 `
 
 func TestGenerate_error1(t *testing.T) {
-	template := "fixtures/config.tmpl"
-
 	cmd := getRootCommand()
-	result := runCmd(cmd, fmt.Sprintf("generate --template %s", template))
+	result := runCmd(cmd, fmt.Sprintf("generate --template %s", testTemplate))
 	if result.Error == nil {
 		t.Error("Expected command to fail due to missing --file flag")
 	}
@@ -75,11 +77,10 @@ func TestGenerate_error2(t *testing.T) {
 }
 
 func TestGenerate_error3(t *testing.T) {
-	template := "fixtures/config.tmpl"
 	file := makeTmp("config.yaml")
 
 	cmd := getRootCommand()
-	result := runCmd(cmd, fmt.Sprintf("generate --template %s --file %s", template, file))
+	result := runCmd(cmd, fmt.Sprintf("generate --template %s --file %s", testTemplate, file))
 	if result.Error == nil {
 		t.Error("Expected command to fail due to missing arg(s)")
 	}
@@ -89,12 +90,11 @@ func TestGenerate_error3(t *testing.T) {
 }
 
 func TestGenerate(t *testing.T) {
-	template := "fixtures/config.tmpl"
 	file := makeTmp("config.yaml")
 	args := []string{"INSTANCE=https://localhost:443", "INSTANCE_NAME=localhost:443", "NAMESPACE=mynamespace", "USERNAME=fakeuser"}
 
 	cmd := getRootCommand()
-	result := runCmd(cmd, fmt.Sprintf("generate --template %s --file %s %s", template, file, strings.Join(args, " ")))
+	result := runCmd(cmd, fmt.Sprintf("generate --template %s --file %s %s", testTemplate, file, strings.Join(args, " ")))
 	if result.Error != nil {
 		t.Error(result.Error)
 	}
@@ -106,12 +106,11 @@ func TestGenerate(t *testing.T) {
 }
 
 func TestGenerate_alias_short(t *testing.T) {
-	template := "fixtures/config.tmpl"
 	file := makeTmp("config.yaml")
 	args := []string{"INSTANCE=https://localhost:443", "INSTANCE_NAME=localhost:443", "NAMESPACE=mynamespace", "USERNAME=fakeuser"}
 
 	cmd := getRootCommand()
-	result := runCmd(cmd, fmt.Sprintf("gen -t %s -f %s %s", template, file, strings.Join(args, " ")))
+	result := runCmd(cmd, fmt.Sprintf("gen -t %s -f %s %s", testTemplate, file, strings.Join(args, " ")))
 	if result.Error != nil {
 		t.Error(result.Error)
 	}
@@ -134,7 +133,6 @@ func TestGenerateEnv(t *testing.T) {
 		}
 	}()
 
-	template := "fixtures/config.tmpl"
 	file := makeTmp("config.yaml")
 
 	_ = os.Setenv("INSTANCE", "https://localhost:443")
@@ -143,7 +141,7 @@ func TestGenerateEnv(t *testing.T) {
 	_ = os.Setenv("USERNAME", "fakeuser")
 
 	cmd := getRootCommand()
-	result := runCmd(cmd, fmt.Sprintf("generate --env --template %s --file %s", template, file))
+	result := runCmd(cmd, fmt.Sprintf("generate --env --template %s --file %s", testTemplate, file))
 	if result.Error != nil {
 		t.Error(result.Error)
 	}
@@ -166,7 +164,6 @@ func TestGenerateEnv_alias_short(t *testing.T) {
 		}
 	}()
 
-	template := "fixtures/config.tmpl"
 	file := makeTmp("config.yaml")
 
 	_ = os.Setenv("INSTANCE", "https://localhost:443")
@@ -175,7 +172,7 @@ func TestGenerateEnv_alias_short(t *testing.T) {
 	_ = os.Setenv("USERNAME", "fakeuser")
 
 	cmd := getRootCommand()
-	result := runCmd(cmd, fmt.Sprintf("gen -e -t %s -f %s", template, file))
+	result := runCmd(cmd, fmt.Sprintf("gen -e -t %s -f %s", testTemplate, file))
 	if result.Error != nil {
 		t.Error(result.Error)
 	}
