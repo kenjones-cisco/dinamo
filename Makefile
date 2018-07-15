@@ -48,7 +48,7 @@ endif
 
 ## Clean the directory tree of produced artifacts.
 clean: .ci-clean prepare
-	@${DOCKERRUN} bash -c 'rm -rf bin build release cover *.out *.xml'
+	@${DOCKERRUN} bash -c 'rm -rf bin build release cover vendor.orig *.out *.xml'
 
 ## Same as clean but also removes cached dependencies.
 veryclean: clean
