@@ -12,8 +12,7 @@ install:
     - export PATH=$PATH:/tmp/bin/
     - go get -u golang.org/x/tools/cmd/goimports
     - go get -u github.com/mattn/goveralls
-    - go get -u github.com/alecthomas/gometalinter
-    - gometalinter --install --vendor
+    - go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
     - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 before_script:
