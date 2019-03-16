@@ -37,29 +37,28 @@ linters-settings:
     # report about assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`;
     # default is false: such cases aren't reported by default.
     check-blank: false
+
+    # [deprecated] comma-separated list of pairs of the form pkg:regex
+    # the regex is used to ignore names within pkg. (default "fmt:.*").
+    # see https://github.com/kisielk/errcheck#the-deprecated-method for details
+    # ignore: fmt:.*,io/ioutil:^Read.*
+
+    # path to a file containing a list of functions to exclude from checking
+    # see https://github.com/kisielk/errcheck#excluding-functions for details
+    # exclude: /path/to/file.txt
   govet:
     # report about shadowed variables
     check-shadowing: true
-
-    # Obtain type information from installed (to $GOPATH/pkg) package files:
-    # golangci-lint will execute `go install -i` and `go test -i` for analyzed packages
-    # before analyzing them.
-    # By default this option is disabled and govet gets type information by loader from source code.
-    # Loading from source code is slow, but it's done only once for all linters.
-    # Go-installing of packages first time is much slower than loading them from source code,
-    # therefore this option is disabled by default.
-    # But repeated installation is fast in go >= 1.10 because of build caching.
-    # Enable this option only if all conditions are met:
-    #  1. you use only "fast" linters (--fast e.g.): no program loading occurs
-    #  2. you use go >= 1.10
-    #  3. you do repeated runs (false for CI) or cache $GOPATH/pkg or `go env GOCACHE` dir in CI.
-    use-installed-packages: false
   golint:
     # minimal confidence for issues, default is 0.8
     min-confidence: 0.8
   gofmt:
     # simplify code: gofmt with `-s` option, true by default
     simplify: true
+  goimports:
+    # put imports beginning with prefix after 3rd-party packages;
+    # it's a comma-separated list of prefixes
+    local-prefixes: github.com/kenjones-cisco/dinamo
   gocyclo:
     # minimal code complexity to report, 30 by default (but we recommend 10-20)
     min-complexity: 15
@@ -83,9 +82,14 @@ linters-settings:
     # Default is to use a neutral variety of English.
     # Setting locale to US will correct the British spelling of 'colour' to 'color'.
     locale: US
+    # ignore-words:
+    #   - someword
   lll:
-    # max line length, lines longer will be reported. Default is 120. '\t' is counted as 1 character.
-    line-length: 120
+    # max line length, lines longer will be reported. Default is 120.
+    # '\t' is counted as 1 character by default, and can be changed with the tab-width option
+    line-length: 200
+    # tab width in spaces. Default to 1.
+    tab-width: 4
   unused:
     # treat code as a program (not a library) and report unused exported identifiers; default is false.
     # if you enable this setting, unused will report a lot of false-positives in text editors:
@@ -93,10 +97,6 @@ linters-settings:
     # with golangci-lint call it on a directory with the changed file.
     check-exported: false
   unparam:
-    # call graph construction algorithm (cha, rta). In general, use cha for libraries,
-    # and rta for programs with main packages. Default is cha.
-    algo: rta
-
     # Inspect exported functions, default is false. Set to true if no external program/library imports your code.
     # if you enable this setting, unparam will report a lot of false-positives in text editors:
     # if it's called for subdir of a project it can't find external interfaces. All text editor integrations
@@ -114,6 +114,32 @@ linters-settings:
     simple: true
     range-loops: true # Report preallocation suggestions on range loops, true by default
     for-loops: false # Report preallocation suggestions on for loops, false by default
+  gocritic:
+    # Which checks should be enabled; can't be combined with 'disabled-checks';
+    # See https://go-critic.github.io/overview#checks-overview
+    # To check which checks are enabled run `GL_DEBUG=gocritic golangci-lint run`
+    # By default list of stable checks is used.
+    # enabled-checks:
+    #   - rangeValCopy
+
+    # which checks should be disabled; can't be combined with 'enabled-checks'; default is empty
+    disabled-checks:
+      - wrapperFunc
+
+    # Enable multiple checks by tags, run `GL_DEBUG=gocritic golangci-lint` run to see all tags and checks.
+    # Empty list by default. See https://github.com/go-critic/go-critic#usage -> section "Tags".
+    enabled-tags:
+      - diagnostic
+      - performance
+      - style
+      - experimental
+      - opinionated
+
+    settings: # settings passed to gocritic
+      captLocal: # must be valid enabled check name
+        paramsOnly: true
+      rangeValCopy:
+        sizeThreshold: 32
 
 linters:
   # enable:
@@ -121,8 +147,7 @@ linters:
   #   - govet
   enable-all: true
   disable:
-    - gas
-    - lll
+    - gochecknoglobals
   # disable-all: false
   # presets:
   #   - bugs
@@ -136,7 +161,15 @@ issues:
   # excluded by default patterns execute `golangci-lint run --help`
   exclude:
     - Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*printf?|os\.(Un)?Setenv). is not checked
-    - lines are duplicate of.*_test\.go
+
+  # Excluding configuration per-path and per-linter
+  exclude-rules:
+    # Exclude some linters from running on tests files.
+    - path: _test\.go
+      linters:
+        - dupl
+        - gosec
+        - unparam
 
   # Independently from option `exclude` we use default exclude patterns,
   # it can be disabled by this option. To list all

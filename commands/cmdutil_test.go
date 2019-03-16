@@ -39,7 +39,7 @@ func getRootCommand() *cobra.Command {
 	return NewCommandCLI()
 }
 
-func assertResult(t *testing.T, expectedValue interface{}, actualValue interface{}) {
+func assertResult(t *testing.T, expectedValue, actualValue interface{}) {
 	t.Helper()
 	if expectedValue != actualValue {
 		t.Error("Expected <", expectedValue, "> but got <", actualValue, ">", fmt.Sprintf("%T", actualValue))

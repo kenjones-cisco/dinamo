@@ -3,4 +3,4 @@
 set -o errexit
 set -o pipefail
 
-golangci-lint run
+golangci-lint -v run --print-resources-usage -c .golangci.yml
