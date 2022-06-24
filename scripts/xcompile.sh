@@ -31,6 +31,7 @@ build() {
         gox \
             -ldflags "${ldflags}" \
             -arch="amd64" \
+            -arch="arm64" \
             -os="darwin" \
             -os="linux" \
             -os="windows" \

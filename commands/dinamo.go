@@ -16,7 +16,7 @@ type commonOptions struct {
 	Version  bool
 }
 
-// NewCommandCLI creates the root command
+// NewCommandCLI creates the root command.
 func NewCommandCLI() *cobra.Command {
 	opts := &commonOptions{}
 
@@ -28,6 +28,7 @@ func NewCommandCLI() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if opts.Version {
 				cmd.Print(version.GetVersionDisplay())
+
 				return nil
 			}
 			cmd.Println("")
@@ -69,7 +70,7 @@ func NewCommandCLI() *cobra.Command {
 	return rootCmd
 }
 
-// Execute is the entrypoint to run any command
+// Execute is the entrypoint to run any command.
 func Execute() {
 	cmd := NewCommandCLI()
 	if err := cmd.Execute(); err != nil {

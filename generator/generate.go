@@ -8,19 +8,19 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/Masterminds/sprig"
+	sprig "github.com/Masterminds/sprig/v3"
 	"github.com/ghodss/yaml"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 )
 
 var (
-	// SupportedFileTypes provides list of file extensions supported for data files
+	// SupportedFileTypes provides list of file extensions supported for data files.
 	SupportedFileTypes = []string{".json", ".yaml", ".yml"}
 	dataFs             = afero.NewOsFs()
 )
 
-// DataSources specifies different sources of data
+// DataSources specifies different sources of data.
 type DataSources struct {
 	Data     []string
 	DataFile string
@@ -37,14 +37,17 @@ func Generate(inputTemplate, outfile string, sources *DataSources) error {
 		if err != nil {
 			return err
 		}
+
 		b, err := afero.ReadFile(dataFs, fileAbs(sources.DataFile))
 		if err != nil {
 			return err
 		}
+
 		fileData, err := fileMap(ext, b)
 		if err != nil {
 			return err
 		}
+
 		updateMap(fileData, data)
 		log.Debugf("(fileData) data: %v", data)
 	}
@@ -66,10 +69,12 @@ func Generate(inputTemplate, outfile string, sources *DataSources) error {
 
 func listMap(list []string) map[string]interface{} {
 	amap := make(map[string]interface{})
+
 	for _, item := range list {
 		kv := strings.SplitN(item, "=", 2)
 		amap[kv[0]] = kv[1]
 	}
+
 	return amap
 }
 
@@ -86,6 +91,7 @@ func fileMap(ext string, data []byte) (map[string]interface{}, error) {
 			return nil, err
 		}
 	}
+
 	return amap, nil
 }
 
@@ -104,6 +110,7 @@ func fileType(file string) (string, error) {
 			return ext, nil
 		}
 	}
+
 	return "", fmt.Errorf("unsupported file type: %s\nonly %q supported", file, SupportedFileTypes)
 }
 
@@ -112,11 +119,11 @@ func fileAbs(file string) string {
 	// based on the code in 1.10 only if getting the current working directory
 	// fails. If that happens there are likely much larger problems. Therefore
 	// just return the same value provided.
-
 	f, err := filepath.Abs(file)
 	if err != nil {
 		return file
 	}
+
 	return f
 }
 
@@ -132,6 +139,7 @@ func generate(inputTemplate, outfile string, data map[string]interface{}) error 
 	if err != nil {
 		return err
 	}
+
 	tmpl.Option("missingkey=error")
 
 	f, err := dataFs.Create(fileAbs(outfile))

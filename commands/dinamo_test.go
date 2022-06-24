@@ -9,8 +9,8 @@ import (
 
 func TestRootCmdDebug(t *testing.T) {
 	cmd := getRootCommand()
-	result := runCmd(cmd, "-D")
-	if result.Error != nil {
+
+	if result := runCmd(cmd, "-D"); result.Error != nil {
 		t.Error(result.Error)
 	}
 

@@ -57,17 +57,3 @@ make local cover
 make build
 make local build
 ```
-
-## Adding New Dependency
-
-**If prompted to use specific versions, always select "Yes"**
-
-```bash
-DEP=<package> make dep-add
-```
-
-#### Example
-
-```bash
-DEP=github.com/sirupsen/logrus make dep-add
-```

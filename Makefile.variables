@@ -2,8 +2,6 @@ PROJECT_FILE = project.yml
 export PROJECT = $(shell awk '/name: / { print $$2; exit }' ${PROJECT_FILE})
 IMPORT_PATH = $(shell awk '/import: / { print $$2; exit }' ${PROJECT_FILE})
 
-DEP ?=
-
 CI ?=
 ifeq ($(strip $(CI)),)
     CI_ENABLED := 0
@@ -18,7 +16,7 @@ GITHUB_TOKEN ?=
 # Windows environment?
 CYG_CHECK := $(shell hash cygpath 2>/dev/null && echo 1)
 # WSL environment?
-WSL_CHECK := $(shell grep -qE "(Microsoft|WSL)" /proc/version 2>/dev/null && echo 1)
+WSL_CHECK := $(shell grep -qE "(Microsoft)" /proc/version 2>/dev/null && echo 1)
 ifeq ($(CYG_CHECK),1)
 	VBOX_CHECK := $(shell hash VBoxManage 2>/dev/null && echo 1)
 
@@ -41,15 +39,15 @@ DEV_IMAGE := ${PROJECT}_dev
 
 DOCKERRUN := docker run --rm \
 	-e PROJECT_FILE="${PROJECT_FILE}" \
-	-v ${ROOT}/vendor:/go/src \
-	-v ${ROOT}:/${PROJECT}/src/${IMPORT_PATH} \
-	-w /${PROJECT}/src/${IMPORT_PATH} \
+	-v ${ROOT}/.mod:/go/pkg/mod \
+	-v ${ROOT}:/usr/src/${PROJECT} \
+	-w /usr/src/${PROJECT} \
 	${DEV_IMAGE}
 
 DOCKERNOVENDOR := docker run --rm -i \
 	-e PROJECT_FILE="${PROJECT_FILE}" \
 	-e RELEASE_TYPE="${RELEASE_TYPE}" \
 	-e GITHUB_TOKEN="${GITHUB_TOKEN}" \
-	-v ${ROOT}:/${PROJECT}/src/${IMPORT_PATH} \
-	-w /${PROJECT}/src/${IMPORT_PATH} \
+	-v ${ROOT}:/usr/src/${PROJECT} \
+	-w /usr/src/${PROJECT} \
 	${DEV_IMAGE}

@@ -3,7 +3,6 @@ package commands
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"path"
@@ -51,6 +50,7 @@ func uniqueID() string {
 	for i := range b {
 		b[i] = charset[seededRand.Intn(len(charset))]
 	}
+
 	return string(b)
 }
 
@@ -59,13 +59,15 @@ func makeTmp(name string) string {
 	if err := os.Mkdir(tmp, os.ModePerm); err != nil {
 		return path.Join(os.TempDir(), name)
 	}
+
 	return path.Join(tmp, name)
 }
 
 func readFile(name string) string {
-	rawData, err := ioutil.ReadFile(name)
+	rawData, err := os.ReadFile(name)
 	if err != nil {
 		return ""
 	}
+
 	return string(rawData)
 }

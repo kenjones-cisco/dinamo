@@ -48,11 +48,11 @@ endif
 
 ## Clean the directory tree of produced artifacts.
 clean: .ci-clean prepare
-	@${DOCKERRUN} bash -c 'rm -rf bin build release cover vendor.orig *.out *.xml'
+	@${DOCKERRUN} bash -c 'rm -rf bin build release cover *.out *.xml'
 
 ## Same as clean but also removes cached dependencies.
 veryclean: clean
-	@${DOCKERRUN} bash -c 'rm -rf tmp vendor'
+	@${DOCKERRUN} bash -c 'rm -rf tmp .mod'
 
 ## builds the dev container
 prepare: tmp/dev_image_id
@@ -86,27 +86,13 @@ xcompile: check
 # ----------------------------------------------
 # dependencies
 
-## Install dependencies using dep if Gopkg.toml changed.
+## Install dependencies using go mod if go.mod changed.
 vendor: tmp/vendor-installed
-tmp/vendor-installed: tmp/dev_image_id Gopkg.toml
-	@mkdir -p vendor
-	${DOCKERRUN} dep ensure
+tmp/vendor-installed: tmp/dev_image_id go.mod
+	@mkdir -p .mod
+	${DOCKERRUN} go mod tidy
 	@date > tmp/vendor-installed
-	@chmod 644 Gopkg.lock || :
-
-## Update dependencies using dep.
-dep-update: prepare
-	${DOCKERRUN} dep ensure -update ${DEP}
-	@chmod 644 Gopkg.lock || :
-
-# usage DEP=github.com/owner/package make dep-add
-## Add new dependencies to dep and install.
-dep-add: prepare
-ifeq ($(strip $(DEP)),)
-	$(error "No dependency provided. Expected: DEP=<go import path>")
-endif
-	${DOCKERRUN} dep ensure -add ${DEP}
-	@chmod 644 Gopkg.lock || :
+	@chmod 644 go.sum || :
 
 # ----------------------------------------------
 # develop and test
@@ -124,10 +110,11 @@ debug:
 format: tmp/vendor-installed
 	${DOCKERNOVENDOR} bash ./scripts/format.sh
 	@if [[ -n "$$(git -c core.fileMode=false status --porcelain)" ]]; then \
-    	echo "goimports modified code; requires attention!" ; \
-    	if [[ "${CI_ENABLED}" == "1" ]]; then \
-        	exit 1 ; \
-    	fi ; \
+		echo -e "\n\tgoimports modified code; requires attention!\n" ; \
+		if [[ "${CI_ENABLED}" == "1" ]]; then \
+			git status --short ; echo "" ; \
+			exit 1 ; \
+		fi ; \
 	fi
 
 ## Run static code analysis (lint).
@@ -150,7 +137,7 @@ ifeq ($(CI_ENABLED),1)
 	${DOCKERRUN} bash ./scripts/cover.sh --ci
 else
 	${DOCKERRUN} bash ./scripts/cover.sh
-	@chmod 644 cover/coverage.html
+	@chmod 644 cover/coverage.html || :
 endif
 
 docs: prepare

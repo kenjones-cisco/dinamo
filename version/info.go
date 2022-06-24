@@ -16,10 +16,10 @@ var (
 )
 
 const (
-	// ProductName is the name of the product
+	// ProductName is the name of the product.
 	ProductName = "Dynamic Generator"
 
-	// ShortName is a short condensed name of the product
+	// ShortName is a short condensed name of the product.
 	ShortName = "dinamo"
 )
 

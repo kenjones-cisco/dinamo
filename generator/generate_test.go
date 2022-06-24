@@ -1,7 +1,6 @@
 package generator
 
 import (
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"path"
@@ -18,6 +17,7 @@ func uniqueID() string {
 	for i := range b {
 		b[i] = charset[seededRand.Intn(len(charset))]
 	}
+
 	return string(b)
 }
 
@@ -26,14 +26,16 @@ func makeTmp(name string) string {
 	if err := os.Mkdir(tmp, os.ModePerm); err != nil {
 		return path.Join(os.TempDir(), name)
 	}
+
 	return path.Join(tmp, name)
 }
 
 func readOutFile(name string) string {
-	rawData, err := ioutil.ReadFile(name)
+	rawData, err := os.ReadFile(name)
 	if err != nil {
 		return ""
 	}
+
 	return string(rawData)
 }
 
@@ -124,7 +126,6 @@ func TestGenerate_withSourceData(t *testing.T) {
 				t.Errorf("File path does not exist: %v ", err)
 			}
 		}
-
 	}
 }
 
@@ -225,7 +226,6 @@ func TestGenerate_withSourceDataFile(t *testing.T) {
 				t.Errorf("File path does not exist: %v ", err)
 			}
 		}
-
 	}
 }
 
@@ -289,7 +289,8 @@ data:
 `
 
 func TestGenerate_withSourceEnv(t *testing.T) {
-	envVars := []string{"INSTANCE", "INSTANCE_NAME", "NAMESPACE", "USERNAME", "APP_NAME", "LIFECYCLE",
+	envVars := []string{
+		"INSTANCE", "INSTANCE_NAME", "NAMESPACE", "USERNAME", "APP_NAME", "LIFECYCLE",
 		"SECRET_DB_PASSWORD", "SECRET_INTERNAL_API_KEY", "SECRET_CLIENT_PASSWORD", "SECRET_CLIENT_SECRET",
 		"SECRET_OPENSTACK_CLIENT_PASSWORD", "SECRET_OPENSTACK_CLIENT_SECRET", "SECRET_IAM_LDAP_PASSWORD",
 		"SECRET_SYNTHETIC_INFLUX",
@@ -300,20 +301,20 @@ func TestGenerate_withSourceEnv(t *testing.T) {
 		}
 	}()
 
-	_ = os.Setenv("INSTANCE", "https://localhost:443")
-	_ = os.Setenv("INSTANCE_NAME", "localhost:443")
-	_ = os.Setenv("NAMESPACE", "mynamespace")
-	_ = os.Setenv("USERNAME", "fakeuser")
-	_ = os.Setenv("APP_NAME", "test-app")
-	_ = os.Setenv("LIFECYCLE", "dev")
-	_ = os.Setenv("SECRET_DB_PASSWORD", "5JBS0tQDVHpwF2EMUavK")
-	_ = os.Setenv("SECRET_INTERNAL_API_KEY", "Tlvo3h19SgYXtVzbzUCmmhNQ5HRSXdL7clOmEAeasHyPVBwbxN3tPh")
-	_ = os.Setenv("SECRET_CLIENT_PASSWORD", "oSOBZ+SACkHR69Z5d5Ab")
-	_ = os.Setenv("SECRET_CLIENT_SECRET", "yDwRAYcDHxdBzD/7zSQCBbuvZC/j")
-	_ = os.Setenv("SECRET_OPENSTACK_CLIENT_PASSWORD", "2ydqJkot0O2I24e4KYpT")
-	_ = os.Setenv("SECRET_OPENSTACK_CLIENT_SECRET", "N/Wv1seMAoZzHKR1/KnEIUbnyayer2O5k7Sxg9Zw8oD7kl+kuKNgdA==")
-	_ = os.Setenv("SECRET_IAM_LDAP_PASSWORD", "qE8wOrBjL+2oz7ITLpDr")
-	_ = os.Setenv("SECRET_SYNTHETIC_INFLUX", "influx=http://dbusername:SZsZOKjGbHMt1ddNWCe9@server-api.example.com:8200/dbname")
+	t.Setenv("INSTANCE", "https://localhost:443")
+	t.Setenv("INSTANCE_NAME", "localhost:443")
+	t.Setenv("NAMESPACE", "mynamespace")
+	t.Setenv("USERNAME", "fakeuser")
+	t.Setenv("APP_NAME", "test-app")
+	t.Setenv("LIFECYCLE", "dev")
+	t.Setenv("SECRET_DB_PASSWORD", "5JBS0tQDVHpwF2EMUavK")
+	t.Setenv("SECRET_INTERNAL_API_KEY", "Tlvo3h19SgYXtVzbzUCmmhNQ5HRSXdL7clOmEAeasHyPVBwbxN3tPh")
+	t.Setenv("SECRET_CLIENT_PASSWORD", "oSOBZ+SACkHR69Z5d5Ab")
+	t.Setenv("SECRET_CLIENT_SECRET", "yDwRAYcDHxdBzD/7zSQCBbuvZC/j")
+	t.Setenv("SECRET_OPENSTACK_CLIENT_PASSWORD", "2ydqJkot0O2I24e4KYpT")
+	t.Setenv("SECRET_OPENSTACK_CLIENT_SECRET", "N/Wv1seMAoZzHKR1/KnEIUbnyayer2O5k7Sxg9Zw8oD7kl+kuKNgdA==")
+	t.Setenv("SECRET_IAM_LDAP_PASSWORD", "qE8wOrBjL+2oz7ITLpDr")
+	t.Setenv("SECRET_SYNTHETIC_INFLUX", "influx=http://dbusername:SZsZOKjGbHMt1ddNWCe9@server-api.example.com:8200/dbname")
 
 	type args struct {
 		inputTemplate string
@@ -434,10 +435,10 @@ func TestGenerate_withMultipleSources(t *testing.T) {
 		}
 	}()
 
-	_ = os.Setenv("INSTANCE", "https://localhost:443")
-	_ = os.Setenv("INSTANCE_NAME", "localhost:443")
-	_ = os.Setenv("NAMESPACE", "mynamespace")
-	_ = os.Setenv("APP_NAME", "test-app")
+	t.Setenv("INSTANCE", "https://localhost:443")
+	t.Setenv("INSTANCE_NAME", "localhost:443")
+	t.Setenv("NAMESPACE", "mynamespace")
+	t.Setenv("APP_NAME", "test-app")
 
 	type args struct {
 		inputTemplate string

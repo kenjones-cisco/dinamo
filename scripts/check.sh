@@ -3,4 +3,4 @@
 set -o errexit
 set -o pipefail
 
-golangci-lint -v run --print-resources-usage -c .golangci.yml
+golangci-lint -v run --color=always --print-resources-usage -c .golangci.yml --fix

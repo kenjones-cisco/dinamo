@@ -29,9 +29,9 @@ Lightweight command-line utility for generating file(s) from using go templates.
 
 - Download pre-built binaries using [Published Releases](https://github.com/kenjones-cisco/dinamo/releases).
 
-- Alternatively install using `go get`:
+- Alternatively install using `go install`:
 ```
-go get github.com/kenjones-cisco/dinamo/cmd/dinamo
+go install github.com/kenjones-cisco/dinamo/cmd/dinamo@latest
 ```
 
 ## Features

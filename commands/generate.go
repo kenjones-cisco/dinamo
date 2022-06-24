@@ -61,6 +61,7 @@ dinamo gen -t config.tmpl -f output.txt -e -d source.yml key1=value1 key2=value2
 				return err
 			}
 			cmd.Printf("generated: %s\n", opts.File)
+
 			return nil
 		},
 	}

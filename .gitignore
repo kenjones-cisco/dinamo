@@ -109,6 +109,7 @@ cover/
 vendor/
 vendor.orig/
 Godeps/_workspace/
+.mod/
 *.tar.gz
 *.xml
 *.txt

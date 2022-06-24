@@ -129,16 +129,16 @@ func TestGenerateEnv(t *testing.T) {
 	}
 	defer func() {
 		for k, v := range existingEnv {
-			_ = os.Setenv(k, v)
+			t.Setenv(k, v)
 		}
 	}()
 
 	file := makeTmp("config.yaml")
 
-	_ = os.Setenv("INSTANCE", "https://localhost:443")
-	_ = os.Setenv("INSTANCE_NAME", "localhost:443")
-	_ = os.Setenv("NAMESPACE", "mynamespace")
-	_ = os.Setenv("USERNAME", "fakeuser")
+	t.Setenv("INSTANCE", "https://localhost:443")
+	t.Setenv("INSTANCE_NAME", "localhost:443")
+	t.Setenv("NAMESPACE", "mynamespace")
+	t.Setenv("USERNAME", "fakeuser")
 
 	cmd := getRootCommand()
 	result := runCmd(cmd, fmt.Sprintf("generate --env --template %s --file %s", testTemplate, file))
@@ -160,16 +160,16 @@ func TestGenerateEnv_alias_short(t *testing.T) {
 	}
 	defer func() {
 		for k, v := range existingEnv {
-			_ = os.Setenv(k, v)
+			t.Setenv(k, v)
 		}
 	}()
 
 	file := makeTmp("config.yaml")
 
-	_ = os.Setenv("INSTANCE", "https://localhost:443")
-	_ = os.Setenv("INSTANCE_NAME", "localhost:443")
-	_ = os.Setenv("NAMESPACE", "mynamespace")
-	_ = os.Setenv("USERNAME", "fakeuser")
+	t.Setenv("INSTANCE", "https://localhost:443")
+	t.Setenv("INSTANCE_NAME", "localhost:443")
+	t.Setenv("NAMESPACE", "mynamespace")
+	t.Setenv("USERNAME", "fakeuser")
 
 	cmd := getRootCommand()
 	result := runCmd(cmd, fmt.Sprintf("gen -e -t %s -f %s", testTemplate, file))
