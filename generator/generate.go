@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"text/template"
 
 	sprig "github.com/Masterminds/sprig/v3"
-	"github.com/ghodss/yaml"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
+	yaml "go.yaml.in/yaml/v3"
 )
 
 var (
@@ -29,7 +30,7 @@ type DataSources struct {
 
 // Generate file using the specified template file and input data to the specified file location.
 func Generate(inputTemplate, outfile string, sources *DataSources) error {
-	data := make(map[string]interface{})
+	data := make(map[string]any)
 
 	// handle the sources using the inverse priority (file --> env --> args)
 	if sources.DataFile != "" {
@@ -67,8 +68,8 @@ func Generate(inputTemplate, outfile string, sources *DataSources) error {
 	return generate(inputTemplate, outfile, data)
 }
 
-func listMap(list []string) map[string]interface{} {
-	amap := make(map[string]interface{})
+func listMap(list []string) map[string]any {
+	amap := make(map[string]any)
 
 	for _, item := range list {
 		kv := strings.SplitN(item, "=", 2)
@@ -78,8 +79,8 @@ func listMap(list []string) map[string]interface{} {
 	return amap
 }
 
-func fileMap(ext string, data []byte) (map[string]interface{}, error) {
-	amap := make(map[string]interface{})
+func fileMap(ext string, data []byte) (map[string]any, error) {
+	amap := make(map[string]any)
 
 	switch ext {
 	case ".yaml", ".yml":
@@ -95,7 +96,7 @@ func fileMap(ext string, data []byte) (map[string]interface{}, error) {
 	return amap, nil
 }
 
-func updateMap(src, dest map[string]interface{}) {
+func updateMap(src, dest map[string]any) {
 	for k, v := range src {
 		if v != nil {
 			dest[k] = v
@@ -105,10 +106,8 @@ func updateMap(src, dest map[string]interface{}) {
 
 func fileType(file string) (string, error) {
 	ext := filepath.Ext(file)
-	for _, item := range SupportedFileTypes {
-		if item == ext {
-			return ext, nil
-		}
+	if slices.Contains(SupportedFileTypes, ext) {
+		return ext, nil
 	}
 
 	return "", fmt.Errorf("unsupported file type: %s\nonly %q supported", file, SupportedFileTypes)
@@ -127,7 +126,7 @@ func fileAbs(file string) string {
 	return f
 }
 
-func generate(inputTemplate, outfile string, data map[string]interface{}) error {
+func generate(inputTemplate, outfile string, data map[string]any) error {
 	log.WithFields(log.Fields{
 		"template": inputTemplate,
 		"file":     outfile,

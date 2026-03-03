@@ -21,6 +21,7 @@ func TestRootCmdDebug(t *testing.T) {
 
 func TestRootCmdBadLogLevel(t *testing.T) {
 	cmd := getRootCommand()
+
 	result := runCmd(cmd, "-l=fake")
 	if result.Error != nil {
 		t.Error(result.Error)
@@ -37,6 +38,7 @@ func TestRootCmdBadLogLevel(t *testing.T) {
 
 func TestRootCmdLogLevel(t *testing.T) {
 	cmd := getRootCommand()
+
 	result := runCmd(cmd, "--log-level warn")
 	if result.Error != nil {
 		t.Error(result.Error)
@@ -54,6 +56,7 @@ func TestRootCmdDisplayVersion(t *testing.T) {
 	if result.Error != nil {
 		t.Error(result.Error)
 	}
+
 	if !strings.Contains(result.Output, "Dynamic Generator\n version") {
 		t.Error("expected version message to be printed out, but the message was not found.")
 	}
@@ -62,6 +65,7 @@ func TestRootCmdDisplayVersion(t *testing.T) {
 	if result.Error != nil {
 		t.Error(result.Error)
 	}
+
 	if !strings.Contains(result.Output, "Dynamic Generator\n version") {
 		t.Error("expected version message to be printed out, but the message was not found.")
 	}

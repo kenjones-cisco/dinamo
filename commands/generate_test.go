@@ -54,6 +54,7 @@ contexts:
 
 func TestGenerate_error1(t *testing.T) {
 	cmd := getRootCommand()
+
 	result := runCmd(cmd, fmt.Sprintf("generate --template %s", testTemplate))
 	if result.Error == nil {
 		t.Error("Expected command to fail due to missing --file flag")
@@ -67,6 +68,7 @@ func TestGenerate_error2(t *testing.T) {
 	file := makeTmp("config.yaml")
 
 	cmd := getRootCommand()
+
 	result := runCmd(cmd, fmt.Sprintf("generate --file %s", file))
 	if result.Error == nil {
 		t.Error("Expected command to fail due to missing --template flag")
@@ -80,6 +82,7 @@ func TestGenerate_error3(t *testing.T) {
 	file := makeTmp("config.yaml")
 
 	cmd := getRootCommand()
+
 	result := runCmd(cmd, fmt.Sprintf("generate --template %s --file %s", testTemplate, file))
 	if result.Error == nil {
 		t.Error("Expected command to fail due to missing arg(s)")
@@ -94,6 +97,7 @@ func TestGenerate(t *testing.T) {
 	args := []string{"INSTANCE=https://localhost:443", "INSTANCE_NAME=localhost:443", "NAMESPACE=mynamespace", "USERNAME=fakeuser"}
 
 	cmd := getRootCommand()
+
 	result := runCmd(cmd, fmt.Sprintf("generate --template %s --file %s %s", testTemplate, file, strings.Join(args, " ")))
 	if result.Error != nil {
 		t.Error(result.Error)
@@ -101,6 +105,7 @@ func TestGenerate(t *testing.T) {
 
 	got := readFile(file)
 	assertResult(t, wantConfig, got)
+
 	want := "generated: " + file + "\n"
 	assertResult(t, want, result.Output)
 }
@@ -110,6 +115,7 @@ func TestGenerate_alias_short(t *testing.T) {
 	args := []string{"INSTANCE=https://localhost:443", "INSTANCE_NAME=localhost:443", "NAMESPACE=mynamespace", "USERNAME=fakeuser"}
 
 	cmd := getRootCommand()
+
 	result := runCmd(cmd, fmt.Sprintf("gen -t %s -f %s %s", testTemplate, file, strings.Join(args, " ")))
 	if result.Error != nil {
 		t.Error(result.Error)
@@ -117,16 +123,19 @@ func TestGenerate_alias_short(t *testing.T) {
 
 	got := readFile(file)
 	assertResult(t, wantConfig, got)
+
 	want := "generated: " + file + "\n"
 	assertResult(t, want, result.Output)
 }
 
 func TestGenerateEnv(t *testing.T) {
 	envVars := []string{"INSTANCE", "INSTANCE_NAME", "NAMESPACE", "USERNAME"}
+
 	existingEnv := make(map[string]string)
 	for _, k := range envVars {
 		existingEnv[k] = os.Getenv(k)
 	}
+
 	defer func() {
 		for k, v := range existingEnv {
 			t.Setenv(k, v)
@@ -141,6 +150,7 @@ func TestGenerateEnv(t *testing.T) {
 	t.Setenv("USERNAME", "fakeuser")
 
 	cmd := getRootCommand()
+
 	result := runCmd(cmd, fmt.Sprintf("generate --env --template %s --file %s", testTemplate, file))
 	if result.Error != nil {
 		t.Error(result.Error)
@@ -148,16 +158,19 @@ func TestGenerateEnv(t *testing.T) {
 
 	got := readFile(file)
 	assertResult(t, wantConfig, got)
+
 	want := "generated: " + file + "\n"
 	assertResult(t, want, result.Output)
 }
 
 func TestGenerateEnv_alias_short(t *testing.T) {
 	envVars := []string{"INSTANCE", "INSTANCE_NAME", "NAMESPACE", "USERNAME"}
+
 	existingEnv := make(map[string]string)
 	for _, k := range envVars {
 		existingEnv[k] = os.Getenv(k)
 	}
+
 	defer func() {
 		for k, v := range existingEnv {
 			t.Setenv(k, v)
@@ -172,6 +185,7 @@ func TestGenerateEnv_alias_short(t *testing.T) {
 	t.Setenv("USERNAME", "fakeuser")
 
 	cmd := getRootCommand()
+
 	result := runCmd(cmd, fmt.Sprintf("gen -e -t %s -f %s", testTemplate, file))
 	if result.Error != nil {
 		t.Error(result.Error)
@@ -179,6 +193,7 @@ func TestGenerateEnv_alias_short(t *testing.T) {
 
 	got := readFile(file)
 	assertResult(t, wantConfig, got)
+
 	want := "generated: " + file + "\n"
 	assertResult(t, want, result.Output)
 }

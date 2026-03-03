@@ -25,7 +25,7 @@ type resulter struct {
 
 func runCmd(c *cobra.Command, input string) resulter {
 	buf := new(bytes.Buffer)
-	c.SetOutput(buf)
+	c.SetOut(buf)
 	c.SetArgs(strings.Split(input, " "))
 
 	err := c.Execute()
@@ -38,8 +38,9 @@ func getRootCommand() *cobra.Command {
 	return NewCommandCLI()
 }
 
-func assertResult(t *testing.T, expectedValue, actualValue interface{}) {
+func assertResult(t *testing.T, expectedValue, actualValue any) {
 	t.Helper()
+
 	if expectedValue != actualValue {
 		t.Error("Expected <", expectedValue, "> but got <", actualValue, ">", fmt.Sprintf("%T", actualValue))
 	}

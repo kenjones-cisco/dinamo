@@ -25,25 +25,29 @@ func NewCommandCLI() *cobra.Command {
 		Short:        version.ProductName,
 		Long:         "Lightweight command-line utility for generating file(s) from using go templates.",
 		SilenceUsage: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			if opts.Version {
 				cmd.Print(version.GetVersionDisplay())
 
 				return nil
 			}
+
 			cmd.Println("")
 			cmd.Println(cmd.UsageString())
 
 			return nil
 		},
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			var err error
-			var loglevel logrus.Level
+		PersistentPreRun: func(cmd *cobra.Command, _ []string) {
+			var (
+				err      error
+				loglevel logrus.Level
+			)
 
 			if opts.LogLevel != "" {
 				loglevel, err = logrus.ParseLevel(strings.ToLower(opts.LogLevel))
 				if err != nil {
 					cmd.Println("Unknown log-level provided:", opts.LogLevel)
+
 					loglevel = logrus.InfoLevel
 				}
 			}

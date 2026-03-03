@@ -45,6 +45,7 @@ func TestGenerate_withSourceData(t *testing.T) {
 		outfile       string
 		ds            *DataSources
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -135,6 +136,7 @@ func TestGenerate_withSourceDataFile(t *testing.T) {
 		outfile       string
 		ds            *DataSources
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -295,6 +297,7 @@ func TestGenerate_withSourceEnv(t *testing.T) {
 		"SECRET_OPENSTACK_CLIENT_PASSWORD", "SECRET_OPENSTACK_CLIENT_SECRET", "SECRET_IAM_LDAP_PASSWORD",
 		"SECRET_SYNTHETIC_INFLUX",
 	}
+
 	defer func() {
 		for _, k := range envVars {
 			_ = os.Unsetenv(k)
@@ -321,6 +324,7 @@ func TestGenerate_withSourceEnv(t *testing.T) {
 		outfile       string
 		ds            *DataSources
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -429,6 +433,7 @@ data:
 
 func TestGenerate_withMultipleSources(t *testing.T) {
 	envVars := []string{"INSTANCE", "INSTANCE_NAME", "NAMESPACE", "APP_NAME"}
+
 	defer func() {
 		for _, k := range envVars {
 			_ = os.Unsetenv(k)
@@ -445,6 +450,7 @@ func TestGenerate_withMultipleSources(t *testing.T) {
 		outfile       string
 		ds            *DataSources
 	}
+
 	tests := []struct {
 		name    string
 		args    args
