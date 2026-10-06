@@ -5,6 +5,13 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 
 <a name="unreleased"></a>
+## [0.4.1](https://github.com/kenjones-cisco/dinamo/compare/v0.4.0...v0.4.1) (2026-10-06)
+
+
+### Bug Fixes
+
+* **release:** Look up draft releases by ID ([bfeb646](https://github.com/kenjones-cisco/dinamo/commit/bfeb6460d15e9607c066b6f0804d06f2e36d24b6))
+
 ## [0.4.0](https://github.com/kenjones-cisco/dinamo/compare/0.3.0...v0.4.0) (2026-10-06)
 
 
