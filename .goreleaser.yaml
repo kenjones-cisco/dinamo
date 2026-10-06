@@ -1,0 +1,53 @@
+version: 2
+project_name: dinamo
+
+builds:
+  - id: dinamo
+    main: .
+    binary: dinamo
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    flags:
+      - -trimpath
+    ldflags:
+      - >-
+        -s -w
+        -X github.com/kenjones-cisco/dinamo/version.Version={{ .Version }}
+        -X github.com/kenjones-cisco/dinamo/version.GitDescribe={{ if .IsSnapshot }}{{ .Version }}{{ else }}{{ .Tag }}{{ end }}
+        -X github.com/kenjones-cisco/dinamo/version.GitCommit={{ .FullCommit }}
+
+archives:
+  - formats: [zip]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - LICENSE
+      - README.md
+      - CHANGELOG.md
+
+checksum:
+  name_template: "{{ .ProjectName }}_{{ .Version }}_SHA256SUMS"
+  algorithm: sha256
+
+snapshot:
+  version_template: "0.0.0-dev-{{ .ShortCommit }}"
+
+changelog:
+  disable: true
+
+release:
+  github:
+    owner: kenjones-cisco
+    name: dinamo
+  draft: true
+  use_existing_draft: true
+  replace_existing_draft: false
+  replace_existing_artifacts: true
+  target_commitish: "{{ .FullCommit }}"
+  mode: keep-existing

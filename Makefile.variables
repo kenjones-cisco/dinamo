@@ -9,9 +9,6 @@ else
     CI_ENABLED := 1
 endif
 
-# major, minor, patch
-RELEASE_TYPE ?=
-GITHUB_TOKEN ?=
 export TEST_NAME ?=
 export TEST_PKG ?=
 
@@ -50,8 +47,6 @@ DOCKERRUN := docker run --rm \
 
 DOCKERNOVENDOR := docker run --rm -i \
 	-e PROJECT_FILE="${PROJECT_FILE}" \
-	-e RELEASE_TYPE="${RELEASE_TYPE}" \
-	-e GITHUB_TOKEN="${GITHUB_TOKEN}" \
 	-v ${ROOT}:/usr/src/${PROJECT} \
 	-w /usr/src/${PROJECT} \
 	${DEV_IMAGE}

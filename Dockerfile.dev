@@ -2,7 +2,6 @@ FROM golang:1.26.7
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         gettext-base \
-        zip \
     && rm -rf /var/lib/apt/lists/*
 
 ENV YAML_BIN_VERSION 1.13.1
@@ -14,13 +13,10 @@ RUN wget -O /usr/local/bin/jq "https://github.com/stedolan/jq/releases/download/
     && chmod 755 /usr/local/bin/yaml
 
 COPY --from=golangci/golangci-lint:v2.10.1 /usr/bin/golangci-lint /go/bin/golangci-lint
+COPY --from=goreleaser/goreleaser:v2.18.2 /usr/bin/goreleaser /go/bin/goreleaser
 
 RUN git config --system --add safe.directory /usr/src/dinamo
 
-RUN go install gotest.tools/gotestsum@v1.13.0 \
-    && go install github.com/mitchellh/gox@latest \
-    && go install github.com/x-motemen/gobump/cmd/gobump@latest \
-    && go install github.com/git-chglog/git-chglog/cmd/git-chglog@latest \
-    && go install github.com/tcnksm/ghr@latest
+RUN go install gotest.tools/gotestsum@v1.13.0
 
 ENV CGO_ENABLED 0

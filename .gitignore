@@ -104,6 +104,7 @@ _testmain.go
 # more build and test outputs
 bin/
 build/
+dist/
 release/
 cover/
 vendor/

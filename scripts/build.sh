@@ -19,8 +19,8 @@ build() {
     project=$(yaml read "${PROJECT_FILE}" metadata.name)
     import_path=$(yaml read "${PROJECT_FILE}" metadata.import)
 
-    ldflags="-X ${import_path}/version.GitCommit=$(git rev-parse --short HEAD)"
-    ldflags="${ldflags} -X ${import_path}/version.GitDescribe=$(git describe --tags --always)"
+    ldflags="-X ${import_path}/version.GitCommit=$(git rev-parse HEAD)"
+    ldflags="${ldflags} -X ${import_path}/version.GitDescribe=dev-$(git rev-parse --short HEAD)"
 
     mapfile -t targets < <(get_targets)
     for target in "${targets[@]}"; do
