@@ -1,0 +1,19 @@
+scripts/release_test.sh
+  s_02bd8ead98a4f5::t_3755a420e78f58 21-23,48-67,144-153
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bfeb6460d15e9607c066b6f0804d06f2e36d24b6",
+  "prompts": {},
+  "sessions": {
+    "s_02bd8ead98a4f5": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "7fd35c5f-cae5-46b6-a799-d3bb7182e253",
+        "model": "unknown"
+      },
+      "human_author": "Copilot <copilot@example.com>"
+    }
+  }
+}
