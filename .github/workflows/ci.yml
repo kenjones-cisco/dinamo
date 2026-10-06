@@ -15,6 +15,42 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  release-preview:
+    name: Release Preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check Out Source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set Up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.7'
+          cache: false
+
+      - name: Test Release Guards And Workflow Syntax
+        run: |
+          bash scripts/release_test.sh
+          docker run --rm -v "$PWD:/work" -w /work rhysd/actionlint:1.7.12 -color
+          docker run --rm -v "$PWD:/work" -w /work koalaman/shellcheck:v0.11.0 scripts/release.sh scripts/release_test.sh scripts/verify-artifacts.sh
+
+      - name: Install GoReleaser OSS
+        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
+        with:
+          distribution: goreleaser
+          version: v2.18.2
+          install-only: true
+
+      - name: Validate Configuration And Build Snapshots
+        run: |
+          goreleaser check
+          goreleaser release --snapshot --clean
+          bash scripts/verify-artifacts.sh snapshot
+
   check-and-cover:
     name: Check And Coverage
     runs-on: ubuntu-latest

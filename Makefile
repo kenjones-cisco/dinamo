@@ -6,7 +6,7 @@ SHELL := /bin/bash
 include Makefile.variables
 include Makefile.local
 
-.PHONY: help clean veryclean build vendor dep-* format check test test-race cover docs adhoc xcompile bump package upload release
+.PHONY: help clean veryclean build vendor dep-* format check test test-race cover docs adhoc xcompile package
 
 ## display this help message
 help:
@@ -30,10 +30,8 @@ help:
 	@echo '    veryclean       Same as clean but also removes cached dependencies.'
 	@echo
 	@echo '  ## Release Commands'
-	@echo '    bump            Increment version, generate changelog, tag project and push to Github.'
-	@echo '    package         Create archives for each binary and checksum.'
-	@echo '    upload          Uploaded archives and create release on Github.'
-	@echo '    release         Orchestrates bump, xcompile, package and upload tasks.'
+	@echo '    package         Preview ZIP archives and checksums in dist/; never publishes.'
+	@echo '    Releases        Review release PRs and manually publish drafts; see docs/releasing.md.'
 	@echo
 	@echo '  ## Local Commands'
 	@echo '    setup           Configures Minishfit/Docker directory mounts.'
@@ -49,7 +47,7 @@ endif
 
 ## Clean the directory tree of produced artifacts.
 clean: .ci-clean prepare
-	@${DOCKERRUN} bash -c 'rm -rf bin build release cover *.out *.xml'
+	@${DOCKERRUN} bash -c 'rm -rf bin build dist release cover *.out *.xml'
 
 ## Same as clean but also removes cached dependencies.
 veryclean: clean
@@ -78,11 +76,7 @@ build/dev: check */*.go
 
 ## Compile the project for multiple OS and Architectures.
 xcompile: check
-	@rm -rf build/
-	@mkdir -p build
-	${DOCKERRUN} bash ./scripts/xcompile.sh
-	@find build -type d -exec chmod 755 {} \; || :
-	@find build -type f -exec chmod 755 {} \; || :
+	${DOCKERRUN} goreleaser build --snapshot --clean
 
 # ----------------------------------------------
 # dependencies
@@ -102,7 +96,6 @@ tmp/vendor-installed: tmp/dev_image_id go.mod
 debug:
 	@echo IMPORT_PATH="$(IMPORT_PATH)"
 	@echo ROOT="$(ROOT)"
-	@echo RELEASE_TYPE="$(RELEASE_TYPE)"
 	@echo
 	@echo docker commands run as:
 	@echo "$(DOCKERRUN)"
@@ -133,7 +126,7 @@ cover: check
 	${DOCKERRUN} bash ./scripts/cover.sh
 
 docs: prepare
-	@rm -rf docs/
+	@rm -f docs/dinamo*.md
 	@mkdir -p docs
 	${DOCKERNOVENDOR} go run gendocs.go
 	@chmod 755 docs
@@ -147,15 +140,6 @@ adhoc: prepare
 # ----------------------------------------------
 # release
 
-bump: prepare
-	${DOCKERNOVENDOR} bash ./scripts/bump.sh
-
-package: xcompile
-	@rm -rf release/
-	@mkdir -p release/
-	${DOCKERNOVENDOR} bash ./scripts/package.sh
-
-upload: prepare
-	${DOCKERNOVENDOR} bash ./scripts/upload.sh
-
-release: bump package upload
+package: check
+	${DOCKERRUN} goreleaser check
+	${DOCKERRUN} goreleaser release --snapshot --clean

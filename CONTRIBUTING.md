@@ -90,3 +90,25 @@ make local cover
 make build
 make local build
 ```
+
+## Release Contributions
+
+Use Conventional Commits in the squash-merge message: `fix:` increments patch,
+`feat:` increments minor, and `feat!:` or a `BREAKING CHANGE:` footer increments
+minor before 1.0 (major after 1.0). Include user-visible behavior and migration
+requirements in the message; Release Please uses it for release notes.
+
+Release Please owns the version manifest and changelog. Do not manually bump a
+source version, tag, or publish with Make. Review the release PR's version and
+notes, wait for `Check And Coverage` and `Release Preview`, then squash-merge it.
+The release workflow validates that exact commit and uploads a draft. Publication
+is a separate human action after inspecting all six builds and checksums.
+
+`CI=1 make xcompile` builds development binaries for all six platforms;
+`CI=1 make package` previews ZIP archives and checksums in `dist/` without
+publishing. `make build` also identifies as a development build and embeds the
+full commit SHA. Direct `go build` defaults to `dev`, never a claimed release.
+
+See [the release runbook](docs/releasing.md) for App setup, bootstrap instructions,
+draft inspection, and recovery. The old `bump`, `upload`, and `release` targets
+are intentionally removed; local previews never receive a publishing token.

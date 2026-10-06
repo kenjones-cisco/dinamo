@@ -1,0 +1,143 @@
+name: Release
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Recovery only: existing unpublished vX.Y.Z draft tag (empty runs Release Please)"
+        type: string
+        default: ""
+      sha:
+        description: "Recovery only: exact 40-character release commit SHA"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-master
+  cancel-in-progress: false
+
+jobs:
+  validate-request:
+    if: github.repository == 'kenjones-cisco/dinamo' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Validate Recovery Inputs
+        env:
+          RECOVERY_TAG: ${{ inputs.tag }}
+          RECOVERY_SHA: ${{ inputs.sha }}
+        run: |
+          if [[ -n "$RECOVERY_TAG" || -n "$RECOVERY_SHA" ]]; then
+            if [[ ! "$RECOVERY_TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ || ! "$RECOVERY_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+              echo >&2 'Recovery requires both an exact vX.Y.Z tag and full commit SHA'
+              exit 1
+            fi
+          fi
+
+  release-please:
+    needs: validate-request
+    if: github.repository == 'kenjones-cisco/dinamo' && github.ref == 'refs/heads/master' && inputs.tag == ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag: ${{ steps.release.outputs.tag_name }}
+      sha: ${{ steps.release.outputs.sha }}
+    steps:
+      - name: Create Repository App Token
+        id: app
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: dinamo
+          permission-contents: write
+          permission-pull-requests: write
+          permission-issues: write
+
+      - name: Maintain Release PR And Draft
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0 (release-please 17.6.0)
+        with:
+          token: ${{ steps.app.outputs.token }}
+          target-branch: master
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  package-draft:
+    needs: [validate-request, release-please]
+    if: >-
+      always() && !cancelled() &&
+      needs.validate-request.result == 'success' &&
+      github.repository == 'kenjones-cisco/dinamo' && github.ref == 'refs/heads/master' &&
+      (needs.release-please.outputs.release_created == 'true' ||
+       (github.event_name == 'workflow_dispatch' && inputs.tag != '' && inputs.sha != ''))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ needs.release-please.outputs.tag || inputs.tag }}
+      RELEASE_SHA: ${{ needs.release-please.outputs.sha || inputs.sha }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check Out Exact Release Commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.RELEASE_SHA }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify Existing Draft And Tag
+        run: bash scripts/release.sh check "$RELEASE_TAG" "$RELEASE_SHA"
+
+      - name: Set Up Release Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.7'
+          cache: false
+
+      - name: Validate Exact Release Source Without Fixes
+        run: |
+          make prepare
+          docker run --rm -v "$PWD:/usr/src/dinamo" -w /usr/src/dinamo dinamo_dev bash scripts/check.sh --check
+          docker run --rm -v "$PWD:/usr/src/dinamo" -w /usr/src/dinamo dinamo_dev bash scripts/test.sh
+          docker run --rm -v "$PWD:/usr/src/dinamo" -w /usr/src/dinamo dinamo_dev bash scripts/test.sh --race
+          docker run --rm -v "$PWD:/usr/src/dinamo" -w /usr/src/dinamo dinamo_dev bash scripts/cover.sh
+          bash scripts/release_test.sh
+          git diff --exit-code
+
+      - name: Install Pinned GoReleaser OSS
+        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
+        with:
+          distribution: goreleaser
+          version: v2.18.2
+          install-only: true
+
+      - name: Validate GoReleaser Configuration
+        run: goreleaser check
+
+      - name: Recheck Draft And Upload Assets
+        run: bash scripts/release.sh publish "$RELEASE_TAG" "$RELEASE_SHA"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Verify Completed Draft Artifacts
+        run: bash scripts/verify-artifacts.sh "$RELEASE_TAG"
+
+      - name: Retain Build And Coverage Evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-evidence-${{ env.RELEASE_TAG }}
+          path: |
+            dist/
+            cover/
+          if-no-files-found: warn
+          retention-days: 14
