@@ -1,6 +1,6 @@
 module github.com/kenjones-cisco/dinamo
 
-go 1.26
+go 1.26.7
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
@@ -21,6 +21,6 @@ require (
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/spf13/cast v1.7.0 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
-	golang.org/x/crypto v0.26.0 // indirect
-	golang.org/x/text v0.28.0 // indirect
+	golang.org/x/crypto v0.57.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
 )
