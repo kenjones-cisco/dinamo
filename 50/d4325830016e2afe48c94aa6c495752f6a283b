@@ -1,0 +1,48 @@
+Makefile.variables
+  s_9bb138bf0fc95c::t_7ecafff2434b01 15-16,44-45
+Makefile
+  s_9bb138bf0fc95c::t_7ecafff2434b01 9,27,125-127
+  s_9bb138bf0fc95c::t_b4b836144b609e 24-25,110-114,116
+  s_9bb138bf0fc95c::t_df804825b51651 128
+scripts/check.sh
+  s_9bb138bf0fc95c::t_b4b836144b609e 3,5-30
+README.md
+  s_9bb138bf0fc95c::t_6ae353654e2bb5 19-20
+Dockerfile.dev
+  s_9bb138bf0fc95c::t_6ae353654e2bb5 18-19
+  s_9bb138bf0fc95c::t_b4b836144b609e 16-17,24
+  s_9bb138bf0fc95c::t_7ecafff2434b01 20
+scripts/test.sh
+  s_9bb138bf0fc95c::t_7ecafff2434b01 3-29
+scripts/cover.sh
+  s_9bb138bf0fc95c::t_b8e269c3ec0ef6 19-20,23-28
+  s_9bb138bf0fc95c::t_3f92cfe808f847 3,5-8,10-11,13-15,17-18,22,29-39
+.github/workflows/ci.yml
+  h_62a39c9f31f8d0 1-38,44-63
+  s_9bb138bf0fc95c::t_86ee3b71f3d26a 39-43
+CONTRIBUTING.md
+  s_9bb138bf0fc95c::t_b4b836144b609e 49-53
+  s_9bb138bf0fc95c::t_7ecafff2434b01 54-66
+  s_9bb138bf0fc95c::t_6ae353654e2bb5 67-81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "50d4325830016e2afe48c94aa6c495752f6a283b",
+  "prompts": {},
+  "humans": {
+    "h_62a39c9f31f8d0": {
+      "author": "Copilot <copilot@example.com>"
+    }
+  },
+  "sessions": {
+    "s_9bb138bf0fc95c": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "073761b5-cc61-42e6-95e1-af4acf08a365",
+        "model": "unknown"
+      },
+      "human_author": "Copilot <copilot@example.com>"
+    }
+  }
+}
