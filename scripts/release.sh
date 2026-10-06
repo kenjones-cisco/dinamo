@@ -3,7 +3,7 @@
 set -euo pipefail
 
 verify_release() {
-    local tag="$1" sha="$2" release checkout_sha release_tag_sha source_status source_version
+    local tag="$1" sha="$2" release checkout_sha release_tag_sha source_status source_version release_pages release_id
 
     if [[ ! "$tag" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ || ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
         echo >&2 "error: an exact vX.Y.Z tag and full commit SHA are required"
@@ -29,7 +29,15 @@ verify_release() {
         echo >&2 "error: release manifest must match the tag"
         return 1
     fi
-    release=$(gh api "repos/kenjones-cisco/dinamo/releases/tags/$tag") || return 1
+    release_pages=$(gh api --paginate --slurp "repos/kenjones-cisco/dinamo/releases?per_page=100") || return 1
+    release_id=$(jq -er --arg tag "$tag" \
+        '[.[][] | select(.tag_name == $tag)] | if length == 1 then .[0].id else error("expected exactly one matching release") end' \
+        <<< "$release_pages") || return 1
+    if [[ ! "$release_id" =~ ^[1-9][0-9]*$ ]]; then
+        echo >&2 "error: matching release must have a valid numeric ID"
+        return 1
+    fi
+    release=$(gh api "repos/kenjones-cisco/dinamo/releases/$release_id") || return 1
     if ! jq -e --arg tag "$tag" --arg sha "$sha" \
         '.draft == true and .tag_name == $tag and .target_commitish == $sha' <<< "$release" >/dev/null; then
         echo >&2 "error: only an existing draft targeting the exact SHA may be packaged"

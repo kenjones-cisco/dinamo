@@ -18,6 +18,9 @@ tag_exists=true
 status_ok=true
 manifest_ok=true
 upload_ok=true
+release_found=true
+duplicate_release=false
+release_id_ok=true
 uploads=0
 
 git() {
@@ -42,8 +45,26 @@ git() {
 
 gh() {
     [[ "$api_ok" == true ]] || return 1
-    [[ "$*" == 'api repos/kenjones-cisco/dinamo/releases/tags/v0.4.0' ]] || return 1
-    printf '{"draft":%s,"tag_name":"v0.4.0","target_commitish":"%s"}\n' "$draft" "$target_sha"
+    case "$*" in
+        'api repos/kenjones-cisco/dinamo/releases/tags/v0.4.0')
+            echo >&2 'gh: Not Found (HTTP 404): tag lookup cannot find a draft'
+            return 1
+            ;;
+        'api --paginate --slurp repos/kenjones-cisco/dinamo/releases?per_page=100')
+            if [[ "$release_found" != true ]]; then
+                printf '[[{"id":1,"tag_name":"0.3.0","draft":false}],[]]\n'
+            elif [[ "$duplicate_release" == true ]]; then
+                printf '[[{"id":42,"tag_name":"v0.4.0"}],[{"id":43,"tag_name":"v0.4.0"}]]\n'
+            else
+                printf '[[{"id":1,"tag_name":"0.3.0","draft":false}],[{"id":42,"tag_name":"v0.4.0","draft":true}]]\n'
+            fi
+            ;;
+        'api repos/kenjones-cisco/dinamo/releases/42')
+            [[ "$release_id_ok" == true ]] || return 1
+            printf '{"id":42,"draft":%s,"tag_name":"v0.4.0","target_commitish":"%s"}\n' "$draft" "$target_sha"
+            ;;
+        *) echo >&2 "unexpected GitHub operation: $*"; return 1 ;;
+    esac
 }
 
 jq() {
@@ -120,4 +141,13 @@ reject v0.4.0 "$sha"
 status_ok=true
 manifest_ok=false
 reject v0.4.0 "$sha"
-echo 'Release guards: validation, failed upload/retry, draft retry, and 14 rejection cases passed'
+manifest_ok=true
+release_found=false
+reject v0.4.0 "$sha"
+release_found=true
+duplicate_release=true
+reject v0.4.0 "$sha"
+duplicate_release=false
+release_id_ok=false
+reject v0.4.0 "$sha"
+echo 'Release guards: paginated draft lookup, failed upload/retry, and 17 rejection cases passed'
