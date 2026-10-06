@@ -1,10 +1,10 @@
 package commands
 
 import (
+	"log/slog"
 	"os"
 	"strings"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/kenjones-cisco/dinamo/version"
@@ -38,30 +38,26 @@ func NewCommandCLI() *cobra.Command {
 			return nil
 		},
 		PersistentPreRun: func(cmd *cobra.Command, _ []string) {
-			var (
-				err      error
-				loglevel logrus.Level
-			)
+			logLevel := slog.LevelInfo
 
 			if opts.LogLevel != "" {
-				loglevel, err = logrus.ParseLevel(strings.ToLower(opts.LogLevel))
-				if err != nil {
+				var ok bool
+
+				logLevel, ok = parseLogLevel(opts.LogLevel)
+				if !ok {
 					cmd.Println("Unknown log-level provided:", opts.LogLevel)
 
-					loglevel = logrus.InfoLevel
+					logLevel = slog.LevelInfo
 				}
 			}
 
 			if opts.Debug {
-				loglevel = logrus.DebugLevel
+				logLevel = slog.LevelDebug
 			}
 
-			logrus.SetLevel(loglevel)
-			logrus.SetFormatter(&logrus.TextFormatter{
-				DisableTimestamp: false,
-				FullTimestamp:    true,
-				DisableSorting:   true,
-			})
+			slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+				Level: logLevel,
+			})))
 		},
 	}
 
@@ -79,5 +75,20 @@ func Execute() {
 	cmd := NewCommandCLI()
 	if err := cmd.Execute(); err != nil {
 		os.Exit(-1)
+	}
+}
+
+func parseLogLevel(level string) (slog.Level, bool) {
+	switch strings.ToLower(level) {
+	case "debug":
+		return slog.LevelDebug, true
+	case "info":
+		return slog.LevelInfo, true
+	case "warn", "warning":
+		return slog.LevelWarn, true
+	case "error", "fatal":
+		return slog.LevelError, true
+	default:
+		return slog.LevelInfo, false
 	}
 }

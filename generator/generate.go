@@ -3,6 +3,7 @@ package generator
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"slices"
@@ -10,7 +11,6 @@ import (
 	"text/template"
 
 	sprig "github.com/Masterminds/sprig/v3"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	yaml "go.yaml.in/yaml/v3"
 )
@@ -50,19 +50,19 @@ func Generate(inputTemplate, outfile string, sources *DataSources) error {
 		}
 
 		updateMap(fileData, data)
-		log.Debugf("(fileData) data: %v", data)
+		slog.Debug("file data", slog.Any("data", data))
 	}
 
 	if sources.UseEnv {
 		envData := listMap(os.Environ())
 		updateMap(envData, data)
-		log.Debugf("(envData) data: %v", data)
+		slog.Debug("environment data", slog.Any("data", data))
 	}
 
 	if len(sources.Data) > 0 {
 		argsData := listMap(sources.Data)
 		updateMap(argsData, data)
-		log.Debugf("(argsData) data: %v", data)
+		slog.Debug("argument data", slog.Any("data", data))
 	}
 
 	return generate(inputTemplate, outfile, data)
@@ -127,10 +127,11 @@ func fileAbs(file string) string {
 }
 
 func generate(inputTemplate, outfile string, data map[string]any) error {
-	log.WithFields(log.Fields{
-		"template": inputTemplate,
-		"file":     outfile,
-	}).Debugf("generating file with data: %v", data)
+	slog.Debug("generating file with data",
+		slog.String("template", inputTemplate),
+		slog.String("file", outfile),
+		slog.Any("data", data),
+	)
 
 	t := fileAbs(inputTemplate)
 	// Load template

@@ -1,11 +1,15 @@
 package commands
 
 import (
+	"context"
+	"log/slog"
 	"strings"
 	"testing"
-
-	"github.com/sirupsen/logrus"
 )
+
+func isLogLevelEnabled(level slog.Level) bool {
+	return slog.Default().Enabled(context.Background(), level)
+}
 
 func TestRootCmdDebug(t *testing.T) {
 	cmd := getRootCommand()
@@ -14,8 +18,8 @@ func TestRootCmdDebug(t *testing.T) {
 		t.Error(result.Error)
 	}
 
-	if logrus.GetLevel() != logrus.DebugLevel {
-		t.Errorf("expected: %v, got: %v", logrus.DebugLevel, logrus.GetLevel())
+	if !isLogLevelEnabled(slog.LevelDebug) {
+		t.Error("expected debug logging to be enabled")
 	}
 }
 
@@ -31,8 +35,8 @@ func TestRootCmdBadLogLevel(t *testing.T) {
 		t.Error("expected an error message to be printed out, but the message was not found.")
 	}
 
-	if logrus.GetLevel() != logrus.InfoLevel {
-		t.Errorf("expected: %v, got: %v", logrus.InfoLevel, logrus.GetLevel())
+	if isLogLevelEnabled(slog.LevelDebug) || !isLogLevelEnabled(slog.LevelInfo) {
+		t.Error("expected info logging to be enabled and debug logging to be disabled")
 	}
 }
 
@@ -44,8 +48,8 @@ func TestRootCmdLogLevel(t *testing.T) {
 		t.Error(result.Error)
 	}
 
-	if logrus.GetLevel() != logrus.WarnLevel {
-		t.Errorf("expected: %v, got: %v", logrus.WarnLevel, logrus.GetLevel())
+	if isLogLevelEnabled(slog.LevelInfo) || !isLogLevelEnabled(slog.LevelWarn) {
+		t.Error("expected warn logging to be enabled and info logging to be disabled")
 	}
 }
 
