@@ -1,0 +1,33 @@
+generator/generate.go
+  h_62a39c9f31f8d0 53,59,65,131-133
+  s_5c6b10fac9d7fd::t_79ed5cd107198a 6,130,134
+commands/dinamo.go
+  s_5c6b10fac9d7fd::t_f7e313b38e11ff 45
+  s_5c6b10fac9d7fd::t_79ed5cd107198a 4,41,44,46-47,50,55,58-60,80-92
+  s_5c6b10fac9d7fd::t_c954aeb3d3dee7 93-94
+commands/dinamo_test.go
+  s_5c6b10fac9d7fd::t_79ed5cd107198a 4-5,10-13,21-22,38-39,51-52
+go.sum
+  s_5c6b10fac9d7fd::t_4be14666160777 45-46,55-56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1b58fc49b4cf14716afc0c0d103c65f587c85f59",
+  "prompts": {},
+  "humans": {
+    "h_62a39c9f31f8d0": {
+      "author": "Copilot <copilot@example.com>"
+    }
+  },
+  "sessions": {
+    "s_5c6b10fac9d7fd": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "021c0d48-810f-4345-8ef2-c31451422642",
+        "model": "unknown"
+      },
+      "human_author": "Copilot <copilot@example.com>"
+    }
+  }
+}
