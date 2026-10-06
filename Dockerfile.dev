@@ -13,12 +13,14 @@ RUN wget -O /usr/local/bin/jq "https://github.com/stedolan/jq/releases/download/
     && wget -O /usr/local/bin/yaml "https://github.com/mikefarah/yq/releases/download/${YAML_BIN_VERSION}/yaml_linux_amd64" \
     && chmod 755 /usr/local/bin/yaml
 
-RUN go install golang.org/x/tools/cmd/goimports@latest \
-    && go install github.com/mattn/goveralls@latest \
+COPY --from=golangci/golangci-lint:v2.10.1 /usr/bin/golangci-lint /go/bin/golangci-lint
+
+RUN git config --system --add safe.directory /usr/src/dinamo
+
+RUN go install gotest.tools/gotestsum@v1.13.0 \
     && go install github.com/mitchellh/gox@latest \
     && go install github.com/x-motemen/gobump/cmd/gobump@latest \
     && go install github.com/git-chglog/git-chglog/cmd/git-chglog@latest \
-    && go install github.com/tcnksm/ghr@latest \
-    && wget -O - -q https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh
+    && go install github.com/tcnksm/ghr@latest
 
 ENV CGO_ENABLED 0

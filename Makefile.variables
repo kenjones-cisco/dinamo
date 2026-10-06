@@ -12,6 +12,8 @@ endif
 # major, minor, patch
 RELEASE_TYPE ?=
 GITHUB_TOKEN ?=
+export TEST_NAME ?=
+export TEST_PKG ?=
 
 # Windows environment?
 CYG_CHECK := $(shell hash cygpath 2>/dev/null && echo 1)
@@ -39,6 +41,8 @@ DEV_IMAGE := ${PROJECT}_dev
 
 DOCKERRUN := docker run --rm \
 	-e PROJECT_FILE="${PROJECT_FILE}" \
+	-e TEST_NAME \
+	-e TEST_PKG \
 	-v ${ROOT}/.mod:/go/pkg/mod \
 	-v ${ROOT}:/usr/src/${PROJECT} \
 	-w /usr/src/${PROJECT} \

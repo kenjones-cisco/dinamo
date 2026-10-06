@@ -6,7 +6,7 @@ SHELL := /bin/bash
 include Makefile.variables
 include Makefile.local
 
-.PHONY: help clean veryclean build vendor dep-* format check test cover docs adhoc xcompile bump package upload release
+.PHONY: help clean veryclean build vendor dep-* format check test test-race cover docs adhoc xcompile bump package upload release
 
 ## display this help message
 help:
@@ -21,9 +21,10 @@ help:
 	@echo '    vendor          Install dependencies using dep if Gopkg.toml changed.'
 	@echo '    dep-update      Update dependencies using dep.'
 	@echo '    dep-add         Add new dependencies to dep and install.'
-	@echo '    format          Run code formatter.'
-	@echo '    check           Run static code analysis (lint).'
+	@echo '    format          Alias for check (format and lint).'
+	@echo '    check           Format and lint code; validate only in CI.'
 	@echo '    test            Run tests on project.'
+	@echo '    test-race       Run tests with the race detector.'
 	@echo '    cover           Run tests and capture code coverage metrics on project.'
 	@echo '    clean           Clean the directory tree of produced artifacts.'
 	@echo '    veryclean       Same as clean but also removes cached dependencies.'
@@ -106,21 +107,13 @@ debug:
 	@echo docker commands run as:
 	@echo "$(DOCKERRUN)"
 
-## Run code formatter.
-format: tmp/vendor-installed
-	${DOCKERNOVENDOR} bash ./scripts/format.sh
-	@if [[ -n "$$(git -c core.fileMode=false status --porcelain)" ]]; then \
-		echo -e "\n\tgoimports modified code; requires attention!\n" ; \
-		if [[ "${CI_ENABLED}" == "1" ]]; then \
-			git status --short ; echo "" ; \
-			exit 1 ; \
-		fi ; \
-	fi
+## Alias for check (format and lint).
+format: check
 
-## Run static code analysis (lint).
-check: format
+## Format and lint code; validate only in CI.
+check: tmp/vendor-installed
 ifeq ($(CI_ENABLED),1)
-	${DOCKERNOVENDOR} bash ./scripts/check.sh --ci
+	${DOCKERNOVENDOR} bash ./scripts/check.sh --check
 else
 	${DOCKERNOVENDOR} bash ./scripts/check.sh
 endif
@@ -129,16 +122,15 @@ endif
 test: check
 	${DOCKERRUN} bash ./scripts/test.sh
 
+## Run tests with the race detector.
+test-race: check
+	${DOCKERRUN} bash ./scripts/test.sh --race
+
 ## Run tests and capture code coverage metrics on project.
 cover: check
 	@rm -rf cover/
 	@mkdir -p cover
-ifeq ($(CI_ENABLED),1)
-	${DOCKERRUN} bash ./scripts/cover.sh --ci
-else
 	${DOCKERRUN} bash ./scripts/cover.sh
-	@chmod 644 cover/coverage.html || :
-endif
 
 docs: prepare
 	@rm -rf docs/

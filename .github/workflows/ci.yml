@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-and-cover:
+    name: Check And Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      statuses: write
+    env:
+      CI: "1"
+    steps:
+      - name: Check Out Source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check And Generate Coverage
+        run: make cover
+
+      - name: Summarize Coverage
+        if: ${{ !cancelled() && hashFiles('cover/coverage.txt') != '' }}
+        run: |
+          {
+            printf '## Coverage\n\nMinimum statement coverage: 80%%\n\n```text\n'
+            cat cover/coverage.txt
+            printf '\n```\n'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Retain Coverage Reports
+        if: ${{ !cancelled() && hashFiles('cover/coverage.html') != '' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage
+          path: |
+            cover/cover.out
+            cover/coverage.txt
+            cover/coverage.html
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish Coverage To Coveralls
+        if: ${{ success() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        uses: coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329 # v2.3.8
+        with:
+          file: cover/cover.out
+          format: golang
+          fail-on-error: true

@@ -1,67 +1,39 @@
 #!/bin/bash
-# Generate test coverage statistics for Go packages.
-#
-# Works around the fact that `go test -coverprofile` currently does not work
-# with multiple packages, see https://github.com/golang/go/issues/6909
-#
 
-set -e
+set -euo pipefail
 
-workdir=cover
-profile="$workdir/cover.out"
-mode=count
-results=test.out
+if [[ "$#" -ne 0 ]]; then
+    echo >&2 "usage: $0"
+    exit 1
+fi
 
+mkdir -p cover
+rm -f cover/cover.out cover/coverage.txt cover/coverage.html
 
-generate_cover_data() {
-    for pkg in $(go list ./...);
-    do
-        for subpkg in $(go list "${pkg}");
-        do
-            f="$workdir/$(echo "$subpkg" | tr / -).cover"
-            go test -v -covermode="$mode" -coverprofile="$f" "$subpkg" >> "$results"
-        done
-    done
+go test -count=1 -covermode=atomic -coverpkg=./... -coverprofile=cover/cover.out ./...
+go tool cover -func=cover/cover.out | tee cover/coverage.txt
+go tool cover -html=cover/cover.out -o=cover/coverage.html
 
-    set -- "$workdir"/*.cover
-    if [ ! -f "$1" ]; then
-        rm -f "$results" || :
-        echo "No Test Cases"; exit 0
-    fi
-    echo "mode: $mode" >"$profile"
-    grep -h -v "^mode:" "$workdir"/*.cover >>"$profile"
+awk '
+NR > 1 {
+    blockStatements[$1] = $2
+    blockExecutions[$1] += $3
 }
-
-show_html_report() {
-    go tool cover -html="$profile" -o="$workdir"/coverage.html
-}
-
-show_ci_report() {
-    goveralls -coverprofile="$profile" -service=travis-ci
-}
-
-_done() {
-    local error_code="$?"
-
-    # display actual test results
-    if [ -f "$results" ]; then
-      cat "$results"
-    fi
-
-    return $error_code
-}
-
-trap "_done" EXIT
-
-rm -f "$results"
-generate_cover_data
-
-
-case "$1" in
-"")
-    show_html_report ;;
---ci)
-    show_ci_report ;;
-*)
-    echo >&2 "error: invalid option: $1"; exit 1 ;;
-esac
+END {
+    for (block in blockStatements) {
+        statements += blockStatements[block]
+        if (blockExecutions[block] > 0) {
+            covered += blockStatements[block]
+        }
+    }
+    if (statements == 0) {
+        print "error: coverage profile contains no statements" > "/dev/stderr"
+        exit 1
+    }
+    coverage = 100 * covered / statements
+    printf "Statement coverage: %.2f%% (minimum: 80%%)\n", coverage
+    if (coverage < 80) {
+        print "error: statement coverage is below 80%" > "/dev/stderr"
+        exit 1
+    }
+}' cover/cover.out

@@ -46,6 +46,39 @@ Tests are run using a testing framework, so at the top level you can run this to
 
 **Assumes that you have Minishift / Docker Toolbox / Docker for Mac / Docker for Windows installed.**
 
+`make check` applies formatting and available lint fixes using `.golangci.yml`.
+`make format` is a compatibility alias for the same checks.
+Use `CI=1 make check` to validate formatting and lint without modifying source files.
+For `make local` commands, install golangci-lint v2.10.1 locally.
+
+`make test` uses gotestsum v1.13.0 to summarize tests and run benchmarks.
+Use `TEST_NAME` for a Go test name regular expression and `TEST_PKG` for a single
+package or package pattern; the default is all packages (`./...`). For example:
+
+```bash
+make test TEST_PKG=./generator TEST_NAME='^TestGenerate_withSourceData$'
+make test-race
+```
+
+`make test-race` runs the same tests and benchmarks with race detection and
+enables CGO for that invocation. For local testing, install
+`gotest.tools/gotestsum@v1.13.0`; race mode also requires a C compiler.
+
+`make cover` runs fresh tests with cross-package coverage and requires at least
+80% statement coverage. It writes the native profile to `cover/cover.out`, the
+function summary to `cover/coverage.txt`, and an HTML report to
+`cover/coverage.html`. Open the HTML report in a browser to inspect source coverage.
+Reports are generated before enforcing the threshold, so they remain available
+when coverage is below 80%.
+
+GitHub Actions runs `CI=1 make cover` for pushes to `master` and pull requests.
+Coverage appears in the job summary, and the `coverage` artifact retains the
+profile, summary, and HTML for 14 days. Download the artifact to view its HTML;
+artifacts are not hosted webpages. Successful trusted runs publish to Coveralls
+using the built-in GitHub token. Fork pull requests run the same validation and
+retain reports but do not publish to Coveralls. Configure any hosted coverage
+alerts in Coveralls; the local 80% gate is independent of that service.
+
 ```bash
 # runs all tests (includes formatting and linting)
 make test
