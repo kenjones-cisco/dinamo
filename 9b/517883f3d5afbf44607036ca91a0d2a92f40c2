@@ -1,0 +1,24 @@
+go.mod
+  s_da0cdbec80662e::t_2ffca8ac8cd2aa 3
+  s_da0cdbec80662e::t_1850b38ab9a743 24-25
+Dockerfile.dev
+  s_da0cdbec80662e::t_2ffca8ac8cd2aa 1
+go.sum
+  s_da0cdbec80662e::t_768f29de7cfbea 49-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9b517883f3d5afbf44607036ca91a0d2a92f40c2",
+  "prompts": {},
+  "sessions": {
+    "s_da0cdbec80662e": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "ab3bdb8a-9d06-4754-9d1f-2396a1c61a71",
+        "model": "unknown"
+      },
+      "human_author": "Copilot <copilot@example.com>"
+    }
+  }
+}
